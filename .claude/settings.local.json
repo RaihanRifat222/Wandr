@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(mkdir -p \"E:\\\\Projects\\\\Wandr\\\\wandr\\\\src\\\\lib\\\\supabase\")",
+      "Bash(mkdir -p \"E:\\\\Projects\\\\Wandr\\\\wandr\\\\supabase\")",
+      "Bash(npx tsc *)",
+      "Bash(New-Item -ItemType Directory -Force \"E:\\\\Projects\\\\Wandr\\\\wandr\\\\src\\\\lib\\\\actions\")",
+      "Bash(Out-Null)",
+      "Bash(New-Item -ItemType Directory -Force \"E:\\\\Projects\\\\Wandr\\\\wandr\\\\src\\\\app\\\\\\(auth\\)\\\\login\")",
+      "Bash(New-Item -ItemType Directory -Force \"E:\\\\Projects\\\\Wandr\\\\wandr\\\\src\\\\app\\\\\\(auth\\)\\\\signup\")",
+      "Bash(New-Item -ItemType Directory -Force \"E:\\\\Projects\\\\Wandr\\\\wandr\\\\src\\\\app\\\\auth\\\\callback\")",
+      "Bash(Write-Output \"Directories created\")",
+      "Bash(npx next *)"
+    ]
+  }
+}
