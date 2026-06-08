@@ -12,17 +12,17 @@ const INTERESTS = [
 ]
 
 const BUDGET_OPTIONS = [
-  { key: 'backpacker', emoji: '🎒', label: 'Backpacker', desc: 'Under €50 / day',  min: 0,   max: 50   },
-  { key: 'budget',     emoji: '🌿', label: 'Budget',     desc: '€50–100 / day',    min: 50,  max: 100  },
-  { key: 'mid-range',  emoji: '✈️', label: 'Mid-range',  desc: '€100–200 / day',   min: 100, max: 200  },
-  { key: 'comfort',    emoji: '🥂', label: 'Comfort',    desc: '€200+ / day',       min: 200, max: 9999 },
+  { key: 'backpacker', label: 'Backpacker', desc: 'Under €50 / day',  min: 0,   max: 50   },
+  { key: 'budget',     label: 'Budget',     desc: '€50–100 / day',    min: 50,  max: 100  },
+  { key: 'mid-range',  label: 'Mid-range',  desc: '€100–200 / day',   min: 100, max: 200  },
+  { key: 'comfort',    label: 'Comfort',    desc: '€200+ / day',       min: 200, max: 9999 },
 ] as const
 
 const SLIDERS = [
-  { key: 'budget'  as const, leftEmoji: '💰', left: 'Budget',     rightEmoji: '🥂', right: 'Luxury'      },
-  { key: 'planned' as const, leftEmoji: '📋', left: 'Planned',    rightEmoji: '🎲', right: 'Spontaneous' },
-  { key: 'solo'    as const, leftEmoji: '🧍', left: 'Solo',       rightEmoji: '👥', right: 'Group'       },
-  { key: 'relaxed' as const, leftEmoji: '🛋️', left: 'Relaxed',   rightEmoji: '🏃', right: 'Active'      },
+  { key: 'budget'  as const, left: 'Budget',  right: 'Luxury'      },
+  { key: 'planned' as const, left: 'Planned', right: 'Spontaneous' },
+  { key: 'solo'    as const, left: 'Solo',    right: 'Group'       },
+  { key: 'relaxed' as const, left: 'Relaxed', right: 'Active'      },
 ]
 
 const TOTAL_STEPS = 5
@@ -39,14 +39,35 @@ type FormData = {
   budgetRange: string
 }
 
+// ─── SVG icons ────────────────────────────────────────────────────────────────
+
+function CheckIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
+
 // ─── Step 1 ───────────────────────────────────────────────────────────────────
 
 function Step1({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-serif text-2xl font-bold text-stone-800">Where are you based?</h2>
-        <p className="mt-2 text-sm text-stone-500">This helps us find buddies near you</p>
+        <h2 className="font-serif text-2xl font-bold text-gray-800">Where are you based?</h2>
+        <p className="mt-2 text-sm text-gray-500">This helps us find buddies near you</p>
       </div>
       <input
         type="text"
@@ -54,7 +75,7 @@ function Step1({ value, onChange }: { value: string; onChange: (v: string) => vo
         onChange={e => onChange(e.target.value)}
         placeholder="e.g. Lisbon, Portugal"
         autoFocus
-        className="w-full rounded-full px-5 py-3 border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
+        className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
       />
     </div>
   )
@@ -67,8 +88,8 @@ function Step2({ value, onChange }: { value: string; onChange: (v: string) => vo
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-serif text-2xl font-bold text-stone-800">Tell us about yourself</h2>
-        <p className="mt-2 text-sm text-stone-500">Give other travellers a feel for who you are</p>
+        <h2 className="font-serif text-2xl font-bold text-gray-800">Tell us about yourself</h2>
+        <p className="mt-2 text-sm text-gray-500">Give other travellers a feel for who you are</p>
       </div>
       <div className="relative">
         <textarea
@@ -77,11 +98,11 @@ function Step2({ value, onChange }: { value: string; onChange: (v: string) => vo
           placeholder="I'm a solo traveller who loves street food and sunrise hikes..."
           rows={4}
           autoFocus
-          className="w-full rounded-2xl px-5 py-4 border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition resize-none"
+          className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition resize-none"
         />
         <span
           className={`absolute bottom-3 right-4 text-xs ${
-            value.length >= MAX ? 'text-red-400' : 'text-stone-400'
+            value.length >= MAX ? 'text-red-400' : 'text-gray-400'
           }`}
         >
           {value.length}/{MAX}
@@ -103,8 +124,8 @@ function Step3({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-serif text-2xl font-bold text-stone-800">What are you into?</h2>
-        <p className="mt-2 text-sm text-stone-500">
+        <h2 className="font-serif text-2xl font-bold text-gray-800">What are you into?</h2>
+        <p className="mt-2 text-sm text-gray-500">
           Pick at least 3 — the more you choose, the better your matches
         </p>
       </div>
@@ -119,7 +140,7 @@ function Step3({
               className={`rounded-full px-4 py-2 text-sm font-medium border transition-all ${
                 active
                   ? 'bg-brand text-white border-brand shadow-sm'
-                  : 'bg-white text-stone-700 border-stone-200 hover:border-brand/40'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-brand/40 hover:bg-gray-50'
               }`}
             >
               {interest}
@@ -148,19 +169,15 @@ function Step4({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-serif text-2xl font-bold text-stone-800">How do you travel?</h2>
-        <p className="mt-2 text-sm text-stone-500">Drag each slider to your sweet spot</p>
+        <h2 className="font-serif text-2xl font-bold text-gray-800">How do you travel?</h2>
+        <p className="mt-2 text-sm text-gray-500">Drag each slider to your sweet spot</p>
       </div>
       <div className="space-y-8">
-        {SLIDERS.map(({ key, leftEmoji, left, rightEmoji, right }) => (
+        {SLIDERS.map(({ key, left, right }) => (
           <div key={key}>
             <div className="flex items-center justify-between text-sm mb-3">
-              <span className="text-stone-600 font-medium">
-                {leftEmoji} {left}
-              </span>
-              <span className="text-stone-600 font-medium">
-                {right} {rightEmoji}
-              </span>
+              <span className="text-gray-600 font-medium">{left}</span>
+              <span className="text-gray-600 font-medium">{right}</span>
             </div>
             <input
               type="range"
@@ -178,25 +195,6 @@ function Step4({
 
 // ─── Step 5 ───────────────────────────────────────────────────────────────────
 
-function CheckIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  )
-}
-
 function Step5({
   selected,
   onSelect,
@@ -207,10 +205,10 @@ function Step5({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-serif text-2xl font-bold text-stone-800">
-          What's your budget range?
+        <h2 className="font-serif text-2xl font-bold text-gray-800">
+          What&apos;s your budget range?
         </h2>
-        <p className="mt-2 text-sm text-stone-500">Per day, including accommodation</p>
+        <p className="mt-2 text-sm text-gray-500">Per day, including accommodation</p>
       </div>
       <div className="space-y-3">
         {BUDGET_OPTIONS.map(opt => {
@@ -220,18 +218,17 @@ function Step5({
               key={opt.key}
               type="button"
               onClick={() => onSelect(opt.key)}
-              className={`w-full text-left rounded-xl px-5 py-4 border-2 transition-all flex items-center gap-4 ${
+              className={`w-full text-left rounded-lg px-5 py-4 border-2 transition-all flex items-center gap-4 ${
                 active
                   ? 'border-brand bg-orange-50'
-                  : 'border-stone-200 bg-white hover:border-stone-300'
+                  : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
-              <span className="text-2xl leading-none">{opt.emoji}</span>
               <div className="flex-1">
-                <p className={`font-semibold text-sm ${active ? 'text-brand' : 'text-stone-800'}`}>
+                <p className={`font-semibold text-sm ${active ? 'text-brand' : 'text-gray-800'}`}>
                   {opt.label}
                 </p>
-                <p className="text-xs text-stone-500 mt-0.5">{opt.desc}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
               </div>
               {active && (
                 <span className="text-brand ml-auto shrink-0">
@@ -262,7 +259,7 @@ export default function OnboardingFlow() {
     budgetRange: '',
   })
 
-  // ── Step transition ───────────────────────────────────────────────────────
+  // ── Step transition ──────────────────────────────────────────────────────
 
   function goTo(next: number) {
     setVisible(false)
@@ -280,7 +277,7 @@ export default function OnboardingFlow() {
     return true
   })()
 
-  // ── Data helpers ──────────────────────────────────────────────────────────
+  // ── Data helpers ─────────────────────────────────────────────────────────
 
   function toggleInterest(interest: string) {
     setFormData(prev => ({
@@ -298,7 +295,7 @@ export default function OnboardingFlow() {
     }))
   }
 
-  // ── Save ──────────────────────────────────────────────────────────────────
+  // ── Save ─────────────────────────────────────────────────────────────────
 
   function handleFinish() {
     const opt = BUDGET_OPTIONS.find(o => o.key === formData.budgetRange)!
@@ -321,12 +318,12 @@ export default function OnboardingFlow() {
     else handleFinish()
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+    <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Progress bar */}
-      <div className="h-1 bg-stone-100">
+      <div className="h-1 bg-gray-100">
         <div
           className="h-full bg-brand transition-all duration-500 ease-out"
           style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
@@ -335,7 +332,7 @@ export default function OnboardingFlow() {
 
       <div className="px-8 py-10">
         {/* Step counter */}
-        <p className="text-xs font-semibold text-stone-400 tracking-widest uppercase mb-7">
+        <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-7">
           Step {step} of {TOTAL_STEPS}
         </p>
 
@@ -373,7 +370,7 @@ export default function OnboardingFlow() {
 
         {/* Save error */}
         {error && (
-          <p className="mt-5 text-sm text-red-500 bg-red-50 rounded-xl px-4 py-3">
+          <p className="mt-5 text-sm text-red-500 bg-red-50 rounded-lg px-4 py-3">
             {error}
           </p>
         )}
@@ -383,24 +380,24 @@ export default function OnboardingFlow() {
           <button
             type="button"
             onClick={() => goTo(step - 1)}
-            className={`text-sm text-stone-400 hover:text-stone-700 transition font-medium ${
+            className={`text-sm text-gray-400 hover:text-gray-700 transition font-medium ${
               step === 1 ? 'invisible pointer-events-none' : ''
             }`}
           >
-            ← Back
+            Back
           </button>
 
           <button
             type="button"
             onClick={handleNext}
             disabled={!canProceed || isPending}
-            className="rounded-full px-7 py-2.5 bg-brand text-white text-sm font-medium hover:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            className="rounded-lg px-7 py-2.5 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
             {isPending
               ? 'Saving…'
               : step === TOTAL_STEPS
-              ? 'Finish ✓'
-              : 'Next →'}
+              ? 'Finish'
+              : 'Continue'}
           </button>
         </div>
       </div>

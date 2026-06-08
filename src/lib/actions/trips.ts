@@ -75,5 +75,90 @@ export async function requestToJoin(
   })
 
   if (error) return { error: error.message }
+
+  revalidatePath(`/trips/${tripId}`)
+  return {}
+}
+
+export async function acceptTripRequest(
+  requestId: string,
+  tripId: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: 'Not authenticated' }
+
+  // Get requester ID so we can create match + conversation
+  const { data: req } = await supabase
+    .from('trip_requests')
+    .select('requester_id')
+    .eq('id', requestId)
+    .eq('trip_id', tripId)
+    .single()
+
+  if (!req) return { error: 'Request not found' }
+
+  const { error } = await supabase
+    .from('trip_requests')
+    .update({ status: 'accepted', updated_at: new Date().toISOString() })
+    .eq('id', requestId)
+    .eq('trip_id', tripId)
+
+  if (error) return { error: error.message }
+
+  // Mark the two users as connected (or create the match if it didn't exist)
+  const ids = [user.id, req.requester_id].sort()
+  await supabase.from('matches').upsert(
+    {
+      user_a:       ids[0],
+      user_b:       ids[1],
+      score:        0,
+      reasons:      [],
+      status:       'connected',
+      initiated_by: user.id,
+      updated_at:   new Date().toISOString(),
+    },
+    { onConflict: 'user_a,user_b' }
+  )
+
+  // Open a conversation between them (idempotent)
+  const { data: match } = await supabase
+    .from('matches')
+    .select('id')
+    .eq('user_a', ids[0])
+    .eq('user_b', ids[1])
+    .single()
+
+  await supabase.from('conversations').upsert(
+    {
+      participant_a: ids[0],
+      participant_b: ids[1],
+      match_id:      match?.id ?? null,
+    },
+    { onConflict: 'participant_a,participant_b' }
+  )
+
+  revalidatePath(`/trips/${tripId}`)
+  revalidatePath('/messages')
+  return {}
+}
+
+export async function declineTripRequest(
+  requestId: string,
+  tripId: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('trip_requests')
+    .update({ status: 'declined', updated_at: new Date().toISOString() })
+    .eq('id', requestId)
+    .eq('trip_id', tripId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/trips/${tripId}`)
   return {}
 }

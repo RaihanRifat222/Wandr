@@ -33,20 +33,20 @@ export default async function EditProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-sand py-10 px-4">
+    <main className="min-h-screen bg-background py-10 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           {profile.username && (
             <Link
               href={`/profile/${profile.username}`}
-              className="text-sm text-stone-400 hover:text-stone-700 transition font-medium"
+              className="text-sm text-gray-400 hover:text-gray-700 transition font-medium"
             >
               ← Back
             </Link>
           )}
           <div>
-            <h1 className="font-serif text-3xl font-bold text-stone-900">Edit profile</h1>
-            <p className="text-sm text-stone-500 mt-0.5">Keep your travel profile up to date</p>
+            <h1 className="font-serif text-3xl font-bold text-gray-900">Edit profile</h1>
+            <p className="text-sm text-gray-500 mt-0.5">Keep your travel profile up to date</p>
           </div>
         </div>
 

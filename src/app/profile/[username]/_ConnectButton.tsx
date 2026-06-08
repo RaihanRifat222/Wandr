@@ -1,55 +1,76 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { sendBuddyRequest } from '@/lib/actions/profile'
-
-type Status = 'none' | 'pending' | 'connected'
+import { sendBuddyRequest, acceptBuddyRequest } from '@/lib/actions/profile'
+import type { MatchStatus } from './page'
 
 export default function ConnectButton({
   targetUserId,
-  initialStatus,
+  matchStatus: initialStatus,
+  matchId: initialMatchId,
 }: {
   targetUserId: string
-  initialStatus: Status
+  matchStatus: MatchStatus
+  matchId: string | null
 }) {
-  const [status, setStatus] = useState<Status>(initialStatus)
+  const [status, setStatus] = useState<MatchStatus>(initialStatus)
+  const [matchId, setMatchId] = useState<string | null>(initialMatchId)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  // Connected — no action button needed (Message button is on the parent)
   if (status === 'connected') {
     return (
-      <button
-        disabled
-        className="w-full rounded-full py-2.5 border-2 border-stone-200 text-sm font-medium text-stone-400 cursor-default"
-      >
-        ✓ Connected
-      </button>
+      <div className="rounded-lg py-2.5 border border-gray-200 text-sm font-medium text-gray-400 text-center cursor-default">
+        Connected
+      </div>
     )
   }
 
-  if (status === 'pending') {
+  // They sent me a request — show Accept / Decline
+  if (status === 'pending_received' && matchId) {
     return (
-      <button
-        disabled
-        className="w-full rounded-full py-2.5 border-2 border-brand/30 text-sm font-medium text-brand/60 cursor-default"
-      >
-        Request sent
-      </button>
+      <div className="space-y-2">
+        <button
+          onClick={() =>
+            startTransition(async () => {
+              const r = await acceptBuddyRequest(matchId)
+              if (r?.error) setError(r.error)
+              else setStatus('connected')
+            })
+          }
+          disabled={isPending}
+          className="w-full rounded-lg py-2.5 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-60 transition"
+        >
+          {isPending ? 'Accepting…' : 'Accept request'}
+        </button>
+        {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+      </div>
     )
   }
 
+  // I sent them a request — waiting
+  if (status === 'pending_sent') {
+    return (
+      <div className="rounded-lg py-2.5 border-2 border-brand/30 text-sm font-medium text-brand/60 text-center cursor-default">
+        Request sent
+      </div>
+    )
+  }
+
+  // No connection yet — show Connect
   return (
     <div className="space-y-2">
       <button
         onClick={() =>
           startTransition(async () => {
-            const result = await sendBuddyRequest(targetUserId)
-            if (result?.error) setError(result.error)
-            else setStatus('pending')
+            const r = await sendBuddyRequest(targetUserId)
+            if (r?.error) setError(r.error)
+            else setStatus('pending_sent')
           })
         }
         disabled={isPending}
-        className="w-full rounded-full py-2.5 bg-brand text-white text-sm font-medium hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed transition"
+        className="w-full rounded-lg py-2.5 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-60 transition"
       >
         {isPending ? 'Sending…' : 'Connect'}
       </button>

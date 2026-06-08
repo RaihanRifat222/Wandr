@@ -37,15 +37,15 @@ type Props = {
 
 const REGIONS = ['Europe', 'Asia', 'Americas', 'Africa', 'Oceania', 'Middle East']
 
-const REGION_STYLES: Record<string, { from: string; to: string; emoji: string }> = {
-  Europe:           { from: '#667eea', to: '#764ba2', emoji: '🏛️' },
-  Asia:             { from: '#f093fb', to: '#f5576c', emoji: '⛩️' },
-  Americas:         { from: '#43e97b', to: '#38f9d7', emoji: '🌎' },
-  Africa:           { from: '#f7971e', to: '#ffd200', emoji: '🦁' },
-  Oceania:          { from: '#4facfe', to: '#00f2fe', emoji: '🐨' },
-  'Middle East':    { from: '#f6d365', to: '#fda085', emoji: '🕌' },
+const REGION_STYLES: Record<string, { from: string; to: string }> = {
+  Europe:        { from: '#667eea', to: '#764ba2' },
+  Asia:          { from: '#f093fb', to: '#f5576c' },
+  Americas:      { from: '#43e97b', to: '#38f9d7' },
+  Africa:        { from: '#f7971e', to: '#ffd200' },
+  Oceania:       { from: '#4facfe', to: '#00f2fe' },
+  'Middle East': { from: '#f6d365', to: '#fda085' },
 }
-const FALLBACK_STYLE = { from: '#E8520A', to: '#f97316', emoji: '🌍' }
+const FALLBACK_STYLE = { from: '#E8520A', to: '#f97316' }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -53,17 +53,16 @@ function cardStyle(region: string | null) {
   return region ? (REGION_STYLES[region] ?? FALLBACK_STYLE) : FALLBACK_STYLE
 }
 
-function budgetBadge(estimate: number | null) {
+function budgetLabel(estimate: number | null): string | null {
   if (estimate == null) return null
-  if (estimate <= 50)  return { emoji: '🎒', label: 'Backpacker' }
-  if (estimate <= 100) return { emoji: '🌿', label: 'Budget'     }
-  if (estimate <= 200) return { emoji: '✈️', label: 'Mid-range'  }
-  return                      { emoji: '🥂', label: 'Comfort'    }
+  if (estimate <= 50)  return 'Backpacker'
+  if (estimate <= 100) return 'Budget'
+  if (estimate <= 200) return 'Mid-range'
+  return 'Comfort'
 }
 
 function formatDates(start: string | null, end: string | null) {
   if (!start && !end) return null
-  // append time to avoid timezone-shift on date-only strings
   const fmt = (d: string) =>
     new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   if (start && end) return `${fmt(start)} – ${fmt(end)}`
@@ -71,11 +70,69 @@ function formatDates(start: string | null, end: string | null) {
   return `Until ${fmt(end!)}`
 }
 
+// ─── SVG icons ────────────────────────────────────────────────────────────────
+
+function CalendarIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  )
+}
+
+function UsersIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
+}
+
+function MapPinIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+    </svg>
+  )
+}
+
+function WalletIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" /><path d="M4 6v12c0 1.1.9 2 2 2h14v-4" /><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
+
+function PlaneIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 4 17 4 16.8 5.4 15.5 5.5l-4 .5L5 2H3l2 6.5L2.5 12 3 13.5l4-.5 4.5 6.5z" />
+    </svg>
+  )
+}
+
+function GlobeIcon() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+  )
+}
+
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
 function TripCard({ trip, animKey }: { trip: Trip; animKey: number }) {
   const style   = cardStyle(trip.region)
-  const budget  = budgetBadge(trip.budget_estimate)
+  const budget  = budgetLabel(trip.budget_estimate)
   const dates   = formatDates(trip.start_date, trip.end_date)
   const buddies = trip.group_size - 1
 
@@ -83,68 +140,65 @@ function TripCard({ trip, animKey }: { trip: Trip; animKey: number }) {
   const hostInitials = hostName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
 
   return (
-    // animKey change remounts the div → triggers card-enter CSS animation
-    <div key={animKey} className="card-enter bg-white rounded-3xl shadow-xl border border-stone-100 overflow-hidden">
+    <div key={animKey} className="card-enter bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
 
-      {/* ── Gradient header ─────────────────────────────────────────── */}
+      {/* ── Gradient header ──────────────────────────────────────────── */}
       <div
-        className="relative h-52 flex flex-col justify-end px-7 pb-6"
+        className="relative h-44 flex flex-col justify-end px-6 pb-5"
         style={{ background: `linear-gradient(135deg, ${style.from} 0%, ${style.to} 100%)` }}
       >
-        <span className="absolute right-5 top-5 text-7xl opacity-[0.15] select-none pointer-events-none leading-none">
-          {style.emoji}
-        </span>
-        <span className="absolute right-20 bottom-3 text-4xl opacity-[0.12] select-none pointer-events-none leading-none">
-          ✈️
-        </span>
+        {/* subtle inner highlight */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
 
         {trip.region && (
-          <span className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1">
+          <span className="relative text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">
             {trip.region}
           </span>
         )}
-        <h2 className="font-serif text-3xl font-bold text-white leading-tight drop-shadow-sm">
+        <h2 className="relative font-serif text-2xl font-bold text-white leading-tight">
           {trip.destination}
         </h2>
       </div>
 
-      {/* ── Body ────────────────────────────────────────────────────── */}
-      <div className="px-7 py-6 space-y-5">
+      {/* ── Body ─────────────────────────────────────────────────────── */}
+      <div className="px-6 py-5 space-y-4">
 
         {/* Info chips */}
         <div className="flex flex-wrap gap-2">
           {dates && (
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-stone-100 text-stone-700 text-xs font-medium">
-              📅 {dates}
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium">
+              <CalendarIcon /> {dates}
             </span>
           )}
           {budget && (
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-stone-100 text-stone-700 text-xs font-medium">
-              {budget.emoji} {budget.label}
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium">
+              <WalletIcon /> {budget}
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-stone-100 text-stone-700 text-xs font-medium">
-            👥 {buddies} {buddies === 1 ? 'buddy' : 'buddies'} needed
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium">
+            <UsersIcon /> {buddies} {buddies === 1 ? 'buddy' : 'buddies'} needed
           </span>
         </div>
 
         {/* Host */}
-        <div className="flex items-center gap-3 py-4 border-y border-stone-100">
+        <div className="flex items-center gap-3 py-3.5 border-y border-gray-100">
           {trip.host?.avatar_url ? (
             <img
               src={trip.host.avatar_url}
               alt={hostName}
-              className="w-11 h-11 rounded-full object-cover border-2 border-stone-100 shrink-0"
+              className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-100 shrink-0"
             />
           ) : (
-            <div className="w-11 h-11 rounded-full bg-brand/10 text-brand text-sm font-bold font-serif flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-full bg-brand/10 text-brand text-sm font-bold font-serif flex items-center justify-center shrink-0">
               {hostInitials}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-stone-800 truncate">{hostName}</p>
+            <p className="text-sm font-semibold text-gray-800 truncate">{hostName}</p>
             {trip.host?.home_city && (
-              <p className="text-xs text-stone-400 mt-0.5">🏠 {trip.host.home_city}</p>
+              <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                <MapPinIcon /> {trip.host.home_city}
+              </p>
             )}
           </div>
           {trip.host?.username && (
@@ -152,18 +206,18 @@ function TripCard({ trip, animKey }: { trip: Trip; animKey: number }) {
               href={`/profile/${trip.host.username}`}
               className="text-xs text-brand font-semibold hover:underline shrink-0"
             >
-              Profile →
+              View profile
             </Link>
           )}
         </div>
 
         {/* Description */}
         {trip.description ? (
-          <p className="text-sm text-stone-600 leading-relaxed line-clamp-4">
+          <p className="text-sm text-gray-600 leading-relaxed line-clamp-4">
             {trip.description}
           </p>
         ) : (
-          <p className="text-sm text-stone-400 italic">No description provided.</p>
+          <p className="text-sm text-gray-400 italic">No description provided.</p>
         )}
       </div>
     </div>
@@ -220,16 +274,18 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
   if (trips.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-28 text-center">
-        <span className="text-7xl mb-5">🌍</span>
-        <h2 className="font-serif text-2xl font-bold text-stone-800 mb-2">No trips yet</h2>
-        <p className="text-stone-500 text-sm mb-7 max-w-xs">
-          Be the first to post a trip and find your travel buddy!
+        <div className="text-gray-200 mb-6">
+          <GlobeIcon />
+        </div>
+        <h2 className="font-serif text-2xl font-bold text-gray-800 mb-2">No trips yet</h2>
+        <p className="text-gray-500 text-sm mb-7 max-w-xs">
+          Be the first to post a trip and find your travel buddy.
         </p>
         <Link
           href="/trips/new"
-          className="rounded-full px-7 py-3 bg-brand text-white text-sm font-semibold hover:brightness-95 transition shadow-sm"
+          className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 bg-brand text-white text-sm font-semibold hover:brightness-95 transition shadow-sm"
         >
-          Post the first trip ✈️
+          Post the first trip
         </Link>
       </div>
     )
@@ -238,23 +294,23 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
   return (
     <div className="space-y-5">
 
-      {/* ── Page header ─────────────────────────────────────────────── */}
+      {/* ── Page header ──────────────────────────────────────────────── */}
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-stone-900">Browse Trips</h1>
-          <p className="text-sm text-stone-400 mt-0.5">
+          <h1 className="font-serif text-2xl font-bold text-gray-900">Browse Trips</h1>
+          <p className="text-sm text-gray-400 mt-0.5">
             {total} trip{total !== 1 ? 's' : ''} {regionFilter ? `in ${regionFilter}` : 'available'}
           </p>
         </div>
         <Link
           href="/trips/new"
-          className="rounded-full px-4 py-2 bg-brand text-white text-xs font-semibold hover:brightness-95 transition shadow-sm"
+          className="rounded-lg px-4 py-2 bg-brand text-white text-xs font-semibold hover:brightness-95 transition shadow-sm"
         >
           + Post a trip
         </Link>
       </div>
 
-      {/* ── Region filters ──────────────────────────────────────────── */}
+      {/* ── Region filters ───────────────────────────────────────────── */}
       <div className="flex flex-wrap gap-2">
         {[null, ...REGIONS].map(r => (
           <button
@@ -265,7 +321,7 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
               'rounded-full px-4 py-1.5 text-xs font-medium border transition-all',
               regionFilter === r
                 ? 'bg-brand text-white border-brand shadow-sm'
-                : 'bg-white text-stone-600 border-stone-200 hover:border-stone-300',
+                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300',
             ].join(' ')}
           >
             {r ?? 'All regions'}
@@ -273,11 +329,10 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
         ))}
       </div>
 
-      {/* ── No results for this filter ──────────────────────────────── */}
+      {/* ── No results for this filter ───────────────────────────────── */}
       {filtered.length === 0 && (
         <div className="flex flex-col items-center py-20 text-center">
-          <span className="text-5xl mb-3">🔍</span>
-          <p className="text-stone-500 text-sm">No open trips in {regionFilter} right now.</p>
+          <p className="text-gray-500 text-sm">No open trips in {regionFilter} right now.</p>
           <button
             type="button"
             onClick={() => changeFilter(null)}
@@ -288,7 +343,7 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
         </div>
       )}
 
-      {/* ── Card + actions ──────────────────────────────────────────── */}
+      {/* ── Card + actions ───────────────────────────────────────────── */}
       {filtered.length > 0 && trip && (
         <div className="flex flex-col items-center gap-5">
 
@@ -300,7 +355,7 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
                 type="button"
                 aria-label="Previous trip"
                 onClick={() => advance('prev')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 w-10 h-10 rounded-full bg-white border border-stone-200 shadow-md text-stone-500 hover:text-brand hover:border-brand transition flex items-center justify-center text-lg hidden sm:flex"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md text-gray-500 hover:text-brand hover:border-brand transition flex items-center justify-center text-lg hidden sm:flex"
               >
                 ←
               </button>
@@ -311,7 +366,7 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
                 type="button"
                 aria-label="Next trip"
                 onClick={() => advance('next')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 w-10 h-10 rounded-full bg-white border border-stone-200 shadow-md text-stone-500 hover:text-brand hover:border-brand transition flex items-center justify-center text-lg hidden sm:flex"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md text-gray-500 hover:text-brand hover:border-brand transition flex items-center justify-center text-lg hidden sm:flex"
               >
                 →
               </button>
@@ -328,7 +383,7 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
               type="button"
               onClick={handlePass}
               disabled={cur >= total - 1}
-              className="flex-1 flex items-center justify-center gap-2 rounded-full py-4 bg-white border-2 border-stone-200 text-stone-600 text-sm font-semibold hover:border-stone-300 hover:bg-stone-50 disabled:opacity-30 disabled:cursor-not-allowed transition shadow-sm"
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 bg-white border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-gray-300 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition shadow-sm"
             >
               <span className="text-base leading-none">✕</span>
               Pass
@@ -336,14 +391,13 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
 
             {/* Counter */}
             <div className="flex flex-col items-center shrink-0 min-w-[3.5rem]">
-              <span className="text-lg font-serif font-bold text-stone-700">{cur + 1}</span>
-              <span className="text-[10px] text-stone-400 font-medium -mt-0.5">of {total}</span>
+              <span className="text-lg font-serif font-bold text-gray-700">{cur + 1}</span>
+              <span className="text-[10px] text-gray-400 font-medium -mt-0.5">of {total}</span>
             </div>
 
             {/* Join / Your trip */}
             {trip.host?.id === userId ? (
-              <div className="flex-1 flex items-center justify-center gap-2 rounded-full py-4 bg-stone-100 border-2 border-stone-200 text-stone-400 text-sm font-semibold cursor-default">
-                <span className="text-base leading-none">🧳</span>
+              <div className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 bg-gray-100 border-2 border-gray-200 text-gray-400 text-sm font-semibold cursor-default">
                 Your trip
               </div>
             ) : (
@@ -352,50 +406,50 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
                 onClick={handleJoin}
                 disabled={justJoined || joined.has(trip.id)}
                 className={[
-                  'flex-1 flex items-center justify-center gap-2 rounded-full py-4 text-sm font-semibold transition shadow-sm border-2',
+                  'flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold transition shadow-sm border-2',
                   justJoined
                     ? 'bg-emerald-500 border-emerald-500 text-white'
                     : joined.has(trip.id)
-                    ? 'bg-stone-100 border-stone-200 text-stone-400 cursor-default'
+                    ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-default'
                     : 'bg-brand border-brand text-white hover:brightness-95',
                 ].join(' ')}
               >
                 {justJoined ? (
-                  <><span className="text-base leading-none">✓</span> Requested!</>
+                  <><CheckIcon /> Requested!</>
                 ) : joined.has(trip.id) ? (
-                  <><span className="text-base leading-none">✓</span> Requested</>
+                  <><CheckIcon /> Requested</>
                 ) : (
-                  <><span className="text-base leading-none">✈</span> Join</>
+                  <><PlaneIcon /> Join</>
                 )}
               </button>
             )}
           </div>
 
-          {/* Mobile prev/next hint */}
+          {/* Mobile prev/next */}
           <div className="flex items-center gap-3 sm:hidden">
             <button
               type="button"
               onClick={() => advance('prev')}
               disabled={cur <= 0}
-              className="text-xs text-stone-400 hover:text-stone-700 disabled:opacity-30 transition font-medium"
+              className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30 transition font-medium"
             >
               ← Prev
             </button>
-            <span className="text-stone-300">·</span>
+            <span className="text-gray-300">·</span>
             <button
               type="button"
               onClick={() => advance('next')}
               disabled={cur >= total - 1}
-              className="text-xs text-stone-400 hover:text-stone-700 disabled:opacity-30 transition font-medium"
+              className="text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30 transition font-medium"
             >
               Next →
             </button>
           </div>
 
-          {/* End of stack message */}
+          {/* End of stack */}
           {cur === total - 1 && (
-            <p className="text-xs text-stone-400 text-center mt-1">
-              You&apos;ve seen all {total} trip{total !== 1 ? 's' : ''} •{' '}
+            <p className="text-xs text-gray-400 text-center mt-1">
+              You&apos;ve seen all {total} trip{total !== 1 ? 's' : ''} &middot;{' '}
               <Link href="/trips/new" className="text-brand hover:underline font-medium">
                 Post your own
               </Link>

@@ -82,6 +82,57 @@ export async function checkUsernameAvailable(
     : { available: true }
 }
 
+export async function acceptBuddyRequest(
+  matchId: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) redirect('/login')
+
+  const { data: match } = await supabase
+    .from('matches')
+    .select('id, user_a, user_b')
+    .eq('id', matchId)
+    .eq('status', 'pending')
+    .single()
+
+  if (!match) return { error: 'Request not found' }
+
+  const { error } = await supabase
+    .from('matches')
+    .update({ status: 'connected', updated_at: new Date().toISOString() })
+    .eq('id', matchId)
+
+  if (error) return { error: error.message }
+
+  // Open a conversation between them
+  await supabase.from('conversations').upsert(
+    { participant_a: match.user_a, participant_b: match.user_b, match_id: matchId },
+    { onConflict: 'participant_a,participant_b' }
+  )
+
+  revalidatePath('/messages')
+  revalidatePath('/matches')
+  return {}
+}
+
+export async function declineBuddyRequest(
+  matchId: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) redirect('/login')
+
+  const { error } = await supabase
+    .from('matches')
+    .update({ status: 'declined', updated_at: new Date().toISOString() })
+    .eq('id', matchId)
+
+  if (error) return { error: error.message }
+  revalidatePath('/matches')
+  return {}
+}
+
 export async function sendBuddyRequest(
   targetUserId: string
 ): Promise<{ error: string } | undefined> {

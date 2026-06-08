@@ -14,17 +14,17 @@ const INTERESTS = [
 ]
 
 const BUDGET_OPTIONS = [
-  { key: 'backpacker', emoji: '🎒', label: 'Backpacker', desc: 'Under €50 / day',  min: 0,   max: 50   },
-  { key: 'budget',     emoji: '🌿', label: 'Budget',     desc: '€50–100 / day',    min: 50,  max: 100  },
-  { key: 'mid-range',  emoji: '✈️', label: 'Mid-range',  desc: '€100–200 / day',   min: 100, max: 200  },
-  { key: 'comfort',    emoji: '🥂', label: 'Comfort',    desc: '€200+ / day',       min: 200, max: 9999 },
+  { key: 'backpacker', label: 'Backpacker', desc: 'Under €50 / day',  min: 0,   max: 50   },
+  { key: 'budget',     label: 'Budget',     desc: '€50–100 / day',    min: 50,  max: 100  },
+  { key: 'mid-range',  label: 'Mid-range',  desc: '€100–200 / day',   min: 100, max: 200  },
+  { key: 'comfort',    label: 'Comfort',    desc: '€200+ / day',       min: 200, max: 9999 },
 ] as const
 
 const SLIDERS = [
-  { key: 'budget'  as const, leftEmoji: '💰', left: 'Budget',  rightEmoji: '🥂', right: 'Luxury'      },
-  { key: 'planned' as const, leftEmoji: '📋', left: 'Planned', rightEmoji: '🎲', right: 'Spontaneous' },
-  { key: 'solo'    as const, leftEmoji: '🧍', left: 'Solo',    rightEmoji: '👥', right: 'Group'       },
-  { key: 'relaxed' as const, leftEmoji: '🛋️', left: 'Relaxed', rightEmoji: '🏃', right: 'Active'      },
+  { key: 'budget'  as const, left: 'Budget',  right: 'Luxury'      },
+  { key: 'planned' as const, left: 'Planned', right: 'Spontaneous' },
+  { key: 'solo'    as const, left: 'Solo',    right: 'Group'       },
+  { key: 'relaxed' as const, left: 'Relaxed', right: 'Active'      },
 ]
 
 type TravelStyle = { budget: number; planned: number; solo: number; relaxed: number }
@@ -51,8 +51,8 @@ function CheckIcon() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 p-6 space-y-5">
-      <h2 className="font-serif text-lg font-bold text-stone-800">{title}</h2>
+    <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
+      <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">{title}</h2>
       {children}
     </div>
   )
@@ -109,7 +109,7 @@ export default function EditProfileForm({
 
   const BIO_MAX = 200
 
-  // ── Avatar upload ─────────────────────────────────────────────────────────
+  // ── Avatar upload ────────────────────────────────────────────────────────
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -140,7 +140,7 @@ export default function EditProfileForm({
     }
   }
 
-  // ── Username availability check ───────────────────────────────────────────
+  // ── Username availability check ──────────────────────────────────────────
 
   async function handleUsernameBlur() {
     const val = username.toLowerCase().trim()
@@ -159,7 +159,7 @@ export default function EditProfileForm({
     }
   }
 
-  // ── Save ──────────────────────────────────────────────────────────────────
+  // ── Save ─────────────────────────────────────────────────────────────────
 
   function handleSave() {
     const trimmedUsername = username.toLowerCase().trim()
@@ -194,13 +194,13 @@ export default function EditProfileForm({
     })
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-5 pb-10">
+    <div className="space-y-4 pb-10">
 
-      {/* ── Avatar ──────────────────────────────────────────────────────── */}
-      <Section title="Avatar">
+      {/* ── Avatar ────────────────────────────────────────────────────── */}
+      <Section title="Photo">
         <div className="flex items-center gap-5">
           <button
             type="button"
@@ -212,7 +212,7 @@ export default function EditProfileForm({
               <img
                 src={avatarUrl}
                 alt="Avatar"
-                className="w-20 h-20 rounded-full object-cover border-2 border-stone-100 group-hover:opacity-75 transition"
+                className="w-20 h-20 rounded-full object-cover ring-4 ring-gray-100 group-hover:opacity-75 transition"
               />
             ) : (
               <div className="w-20 h-20 rounded-full bg-brand/10 text-brand flex items-center justify-center text-2xl font-bold font-serif group-hover:bg-brand/20 transition">
@@ -226,10 +226,10 @@ export default function EditProfileForm({
             </span>
           </button>
           <div>
-            <p className="text-sm text-stone-700 font-medium">
+            <p className="text-sm text-gray-700 font-medium">
               {uploading ? 'Uploading…' : 'Click to upload a new photo'}
             </p>
-            <p className="text-xs text-stone-400 mt-0.5">JPG, PNG, WebP — max 5 MB</p>
+            <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, WebP — max 5 MB</p>
           </div>
         </div>
         <input
@@ -241,12 +241,12 @@ export default function EditProfileForm({
         />
       </Section>
 
-      {/* ── Basic info ──────────────────────────────────────────────────── */}
+      {/* ── Basic info ────────────────────────────────────────────────── */}
       <Section title="Basic info">
         <div className="space-y-4">
 
           <label className="block">
-            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1.5 block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
               Display name
             </span>
             <input
@@ -254,16 +254,16 @@ export default function EditProfileForm({
               value={fullName}
               onChange={e => setFullName(e.target.value)}
               placeholder="Your name"
-              className="w-full rounded-full px-5 py-3 border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
+              className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
             />
           </label>
 
           <label className="block">
-            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1.5 block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
               Username
             </span>
             <div className="relative">
-              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-stone-400 text-sm pointer-events-none">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
                 @
               </span>
               <input
@@ -275,22 +275,22 @@ export default function EditProfileForm({
                 }}
                 onBlur={handleUsernameBlur}
                 placeholder="yourname"
-                className={`w-full rounded-full pl-9 pr-5 py-3 border bg-stone-50 text-stone-900 placeholder:text-stone-400 text-sm focus:outline-none focus:ring-2 transition ${
+                className={`w-full rounded-lg pl-8 pr-4 py-3 border bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 transition ${
                   usernameStatus === 'error'
                     ? 'border-red-300 focus:ring-red-200 focus:border-red-300'
                     : usernameStatus === 'ok'
                     ? 'border-emerald-300 focus:ring-emerald-200 focus:border-emerald-300'
-                    : 'border-stone-200 focus:ring-brand focus:border-brand'
+                    : 'border-gray-200 focus:ring-brand focus:border-brand'
                 }`}
               />
             </div>
-            {usernameStatus === 'error'    && <p className="text-xs text-red-500 mt-1 ml-2">{usernameMsg}</p>}
-            {usernameStatus === 'ok'       && <p className="text-xs text-emerald-600 mt-1 ml-2">✓ Available</p>}
-            {usernameStatus === 'checking' && <p className="text-xs text-stone-400 mt-1 ml-2">Checking…</p>}
+            {usernameStatus === 'error'    && <p className="text-xs text-red-500 mt-1 ml-1">{usernameMsg}</p>}
+            {usernameStatus === 'ok'       && <p className="text-xs text-emerald-600 mt-1 ml-1">Available</p>}
+            {usernameStatus === 'checking' && <p className="text-xs text-gray-400 mt-1 ml-1">Checking…</p>}
           </label>
 
           <label className="block">
-            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1.5 block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
               Home city
             </span>
             <input
@@ -298,12 +298,12 @@ export default function EditProfileForm({
               value={homeCity}
               onChange={e => setHomeCity(e.target.value)}
               placeholder="e.g. Lisbon, Portugal"
-              className="w-full rounded-full px-5 py-3 border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
+              className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
             />
           </label>
 
           <label className="block">
-            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1.5 block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
               Bio
             </span>
             <div className="relative">
@@ -312,11 +312,11 @@ export default function EditProfileForm({
                 onChange={e => setBio(e.target.value.slice(0, BIO_MAX))}
                 placeholder="Tell travellers about yourself…"
                 rows={4}
-                className="w-full rounded-2xl px-5 py-4 border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition resize-none"
+                className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition resize-none"
               />
               <span
                 className={`absolute bottom-3 right-4 text-xs ${
-                  bio.length >= BIO_MAX ? 'text-red-400' : 'text-stone-400'
+                  bio.length >= BIO_MAX ? 'text-red-400' : 'text-gray-400'
                 }`}
               >
                 {bio.length}/{BIO_MAX}
@@ -327,7 +327,7 @@ export default function EditProfileForm({
         </div>
       </Section>
 
-      {/* ── Interests ───────────────────────────────────────────────────── */}
+      {/* ── Interests ─────────────────────────────────────────────────── */}
       <Section title="Interests">
         <div className="flex flex-wrap gap-2">
           {INTERESTS.map(interest => {
@@ -346,7 +346,7 @@ export default function EditProfileForm({
                 className={`rounded-full px-4 py-2 text-sm font-medium border transition-all ${
                   active
                     ? 'bg-brand text-white border-brand shadow-sm'
-                    : 'bg-white text-stone-700 border-stone-200 hover:border-brand/40'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-brand/40 hover:bg-gray-50'
                 }`}
               >
                 {interest}
@@ -356,14 +356,14 @@ export default function EditProfileForm({
         </div>
       </Section>
 
-      {/* ── Travel style ────────────────────────────────────────────────── */}
+      {/* ── Travel style ──────────────────────────────────────────────── */}
       <Section title="Travel style">
-        <div className="space-y-8">
-          {SLIDERS.map(({ key, leftEmoji, left, rightEmoji, right }) => (
+        <div className="space-y-7">
+          {SLIDERS.map(({ key, left, right }) => (
             <div key={key}>
-              <div className="flex items-center justify-between text-sm mb-3">
-                <span className="text-stone-600 font-medium">{leftEmoji} {left}</span>
-                <span className="text-stone-600 font-medium">{right} {rightEmoji}</span>
+              <div className="flex items-center justify-between text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                <span>{left}</span>
+                <span>{right}</span>
               </div>
               <input
                 type="range"
@@ -379,9 +379,9 @@ export default function EditProfileForm({
         </div>
       </Section>
 
-      {/* ── Budget range ────────────────────────────────────────────────── */}
-      <Section title="Budget range">
-        <div className="space-y-3">
+      {/* ── Budget range ──────────────────────────────────────────────── */}
+      <Section title="Daily budget">
+        <div className="space-y-2">
           {BUDGET_OPTIONS.map(opt => {
             const active = budgetKey === opt.key
             return (
@@ -389,18 +389,17 @@ export default function EditProfileForm({
                 key={opt.key}
                 type="button"
                 onClick={() => setBudgetKey(opt.key)}
-                className={`w-full text-left rounded-xl px-5 py-4 border-2 transition-all flex items-center gap-4 ${
+                className={`w-full text-left rounded-lg px-5 py-4 border-2 transition-all flex items-center gap-4 ${
                   active
                     ? 'border-brand bg-orange-50'
-                    : 'border-stone-200 bg-white hover:border-stone-300'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
-                <span className="text-2xl leading-none">{opt.emoji}</span>
                 <div className="flex-1">
-                  <p className={`font-semibold text-sm ${active ? 'text-brand' : 'text-stone-800'}`}>
+                  <p className={`font-semibold text-sm ${active ? 'text-brand' : 'text-gray-800'}`}>
                     {opt.label}
                   </p>
-                  <p className="text-xs text-stone-500 mt-0.5">{opt.desc}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
                 </div>
                 {active && (
                   <span className="text-brand ml-auto shrink-0">
@@ -413,28 +412,28 @@ export default function EditProfileForm({
         </div>
       </Section>
 
-      {/* ── Error ───────────────────────────────────────────────────────── */}
+      {/* ── Error ─────────────────────────────────────────────────────── */}
       {error && (
-        <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
           {error}
         </div>
       )}
 
-      {/* ── Save button ─────────────────────────────────────────────────── */}
+      {/* ── Save button ───────────────────────────────────────────────── */}
       <button
         type="button"
         onClick={handleSave}
         disabled={isPending || usernameStatus === 'error' || uploading}
-        className="w-full rounded-full py-3 bg-brand text-white font-medium hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        className="w-full rounded-lg py-3 bg-brand text-white font-semibold hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed transition"
       >
         {isPending ? 'Saving…' : 'Save changes'}
       </button>
 
-      {/* ── Success toast ────────────────────────────────────────────────── */}
+      {/* ── Success toast ─────────────────────────────────────────────── */}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-          <div className="rounded-xl bg-emerald-600 text-white px-6 py-3 text-sm font-medium shadow-lg">
-            ✓ Profile saved!
+          <div className="rounded-lg bg-emerald-600 text-white px-6 py-3 text-sm font-medium shadow-lg">
+            Profile saved
           </div>
         </div>
       )}

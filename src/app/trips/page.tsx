@@ -40,10 +40,10 @@ export default async function BrowseTripsPage() {
   const requestedIds = (myRequests ?? []).map(r => r.trip_id as string)
 
   return (
-    <div className="min-h-screen bg-sand">
+    <div className="min-h-screen bg-background">
 
       {/* ── Navbar ──────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-stone-100">
+      <nav className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
 
           <Link href="/dashboard" className="font-serif text-xl font-bold text-brand shrink-0">
@@ -59,7 +59,7 @@ export default async function BrowseTripsPage() {
               <Link
                 key={href}
                 href={href}
-                className="text-sm text-stone-500 hover:text-stone-900 font-medium px-3 py-1.5 rounded-lg hover:bg-stone-100 transition"
+                className="text-sm text-gray-500 hover:text-gray-900 font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 transition"
               >
                 {label}
               </Link>
@@ -72,7 +72,7 @@ export default async function BrowseTripsPage() {
                 <img
                   src={profile.avatar_url}
                   alt="avatar"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-stone-100 group-hover:border-brand transition"
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-brand transition"
                 />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center text-xs font-bold font-serif group-hover:bg-brand/20 transition">
@@ -83,7 +83,7 @@ export default async function BrowseTripsPage() {
             <form action={signOut}>
               <button
                 type="submit"
-                className="text-sm text-stone-500 hover:text-red-600 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition"
+                className="text-sm text-gray-500 hover:text-red-600 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition"
               >
                 Log out
               </button>
