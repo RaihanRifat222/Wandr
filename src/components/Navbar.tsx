@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { signOut } from '@/lib/actions/auth'
 import NotificationBell from './NotificationBell'
+import MessagesButton from './MessagesButton'
 
 export default async function Navbar() {
   const supabase = await createClient()
@@ -35,7 +36,6 @@ export default async function Navbar() {
             { href: '/dashboard', label: 'Feed'         },
             { href: '/trips',     label: 'Browse trips' },
             { href: '/matches',   label: 'Matches'      },
-            { href: '/messages',  label: 'Messages'     },
           ].map(({ href, label }) => (
             <Link
               key={href}
@@ -49,6 +49,7 @@ export default async function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-1 shrink-0">
+          <MessagesButton userId={user.id} />
           <NotificationBell userId={user.id} />
 
           <Link href={profileHref} className="group ml-1">
