@@ -52,7 +52,8 @@ export default async function BrowseTripsPage() {
 
           <div className="hidden sm:flex items-center gap-1">
             {[
-              { href: '/trips',    label: 'Browse trips' },
+              { href: '/dashboard', label: 'Feed'         },
+              { href: '/trips',     label: 'Browse trips' },
               { href: '/matches',  label: 'Matches'      },
               { href: '/messages', label: 'Messages'     },
             ].map(({ href, label }) => (

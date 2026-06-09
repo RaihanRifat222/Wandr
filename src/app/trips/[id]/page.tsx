@@ -165,7 +165,8 @@ export default async function TripDetailPage({
           <Link href="/dashboard" className="font-serif text-xl font-bold text-brand shrink-0">Wandr</Link>
           <div className="hidden sm:flex items-center gap-1">
             {[
-              { href: '/trips',    label: 'Browse trips' },
+              { href: '/dashboard', label: 'Feed'         },
+              { href: '/trips',     label: 'Browse trips' },
               { href: '/matches',  label: 'Matches'      },
               { href: '/messages', label: 'Messages'     },
             ].map(({ href, label }) => (

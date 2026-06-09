@@ -89,14 +89,36 @@ export default async function ProfilePage({
   if (!profile) notFound()
 
   const today = new Date().toISOString().split('T')[0]
-  const { data: trips } = await supabase
-    .from('trips')
-    .select('id, destination, start_date, end_date, group_size')
-    .eq('host_id', profile.id)
-    .eq('status', 'open')
-    .gte('end_date', today)
-    .order('start_date', { ascending: true })
-    .limit(5)
+  const [
+    { data: trips },
+    { data: profilePosts },
+    { count: tripCount },
+    { count: connectionCount },
+  ] = await Promise.all([
+    supabase
+      .from('trips')
+      .select('id, destination, start_date, end_date, group_size')
+      .eq('host_id', profile.id)
+      .eq('status', 'open')
+      .gte('end_date', today)
+      .order('start_date', { ascending: true })
+      .limit(5),
+    supabase
+      .from('posts')
+      .select('id, image_url, created_at')
+      .eq('user_id', profile.id)
+      .order('created_at', { ascending: false })
+      .limit(12),
+    supabase
+      .from('trips')
+      .select('*', { count: 'exact', head: true })
+      .eq('host_id', profile.id),
+    supabase
+      .from('matches')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'connected')
+      .or(`user_a.eq.${profile.id},user_b.eq.${profile.id}`),
+  ])
 
   const isOwn = user?.id === profile.id
   let matchStatus: MatchStatus = 'none'
@@ -207,6 +229,20 @@ export default async function ProfilePage({
           {/* ── Right column ─────────────────────────────────────────── */}
           <div className="space-y-5">
 
+            {/* Stats row */}
+            <div className="bg-white rounded-xl border border-gray-100 px-5 py-4 grid grid-cols-3 divide-x divide-gray-100">
+              {[
+                { value: profilePosts?.length ?? 0, label: 'Posts' },
+                { value: tripCount ?? 0,            label: 'Trips'  },
+                { value: connectionCount ?? 0,      label: 'Connections' },
+              ].map(({ value, label }) => (
+                <div key={label} className="text-center px-4">
+                  <p className="font-serif text-2xl font-bold text-gray-900">{value}</p>
+                  <p className="text-xs text-gray-400 mt-0.5 font-medium">{label}</p>
+                </div>
+              ))}
+            </div>
+
             {/* Interests */}
             {profile.interests?.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-100 p-6">
@@ -286,6 +322,24 @@ export default async function ProfilePage({
                 )}
               </div>
             </div>
+
+            {/* Posts grid */}
+            {profilePosts && profilePosts.length > 0 && (
+              <div className="bg-white rounded-xl border border-gray-100 p-5">
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Posts</h2>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {profilePosts.map(post => (
+                    <Link key={post.id} href="/dashboard" className="block aspect-square overflow-hidden rounded-lg bg-gray-100">
+                      <img
+                        src={post.image_url}
+                        alt=""
+                        className="w-full h-full object-cover hover:opacity-90 transition"
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
