@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { signOut } from '@/lib/actions/auth'
+import Navbar from '@/components/Navbar'
 import ChatWindow from './_ChatWindow'
 
 function getInitials(name: string | null, username: string | null) {
@@ -61,37 +61,7 @@ export default async function ConversationPage({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-
-      {/* ── Navbar ────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          <Link href="/dashboard" className="font-serif text-xl font-bold text-brand shrink-0">Wandr</Link>
-          <div className="hidden sm:flex items-center gap-1">
-            {[
-              { href: '/dashboard', label: 'Feed'         },
-              { href: '/trips',     label: 'Browse trips' },
-              { href: '/matches',  label: 'Matches'      },
-              { href: '/messages', label: 'Messages'     },
-            ].map(({ href, label }) => (
-              <Link key={href} href={href} className="text-sm text-gray-500 hover:text-gray-900 font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 transition">
-                {label}
-              </Link>
-            ))}
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link href={profileHref} className="group">
-              {myProfile?.avatar_url ? (
-                <img src={myProfile.avatar_url} alt="avatar" className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-brand transition" />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center text-xs font-bold font-serif group-hover:bg-brand/20 transition">{navInitials}</div>
-              )}
-            </Link>
-            <form action={signOut}>
-              <button type="submit" className="text-sm text-gray-500 hover:text-red-600 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition">Log out</button>
-            </form>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* ── Chat container ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col max-w-2xl w-full mx-auto px-0 sm:px-4 py-0 sm:py-6">
