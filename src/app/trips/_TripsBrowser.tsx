@@ -128,7 +128,9 @@ function ResultCard({
           {trip.region && (
             <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{trip.region}</span>
           )}
-          <h3 className="font-serif text-lg font-bold text-gray-900 truncate">{trip.destination}</h3>
+          <Link href={`/trips/${trip.id}`}>
+            <h3 className="font-serif text-lg font-bold text-gray-900 truncate hover:text-brand transition-colors">{trip.destination}</h3>
+          </Link>
         </div>
         <span className="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-brand/10 text-brand text-xs font-bold">
           {matchPct}% match

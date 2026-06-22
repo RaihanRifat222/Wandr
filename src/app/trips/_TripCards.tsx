@@ -164,9 +164,11 @@ function TripCard({ trip }: { trip: Trip }) {
             {trip.region}
           </span>
         )}
-        <h2 className="relative font-serif text-2xl font-bold text-white leading-tight">
-          {trip.destination}
-        </h2>
+        <Link href={`/trips/${trip.id}`} className="relative group">
+          <h2 className="font-serif text-2xl font-bold text-white leading-tight group-hover:underline underline-offset-2 decoration-white/60">
+            {trip.destination}
+          </h2>
+        </Link>
       </div>
 
       {/* ── Body ─────────────────────────────────────────────────────── */}
@@ -475,6 +477,16 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
               </motion.button>
             )}
           </div>
+
+          {/* View details */}
+          {trip && (
+            <Link
+              href={`/trips/${trip.id}`}
+              className="text-xs text-gray-400 hover:text-brand transition font-medium"
+            >
+              View full details →
+            </Link>
+          )}
 
           {/* Mobile prev/next */}
           <div className="flex items-center gap-3 sm:hidden">
