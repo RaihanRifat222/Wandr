@@ -31,13 +31,26 @@ type MatchRow = {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function SectionHeader({ title, count }: { title: string; count: number }) {
+function SectionHeader({
+  title,
+  count,
+  subtitle,
+}: {
+  title: string
+  count: number
+  subtitle?: string
+}) {
   return (
-    <div className="flex items-center gap-3 mb-4">
-      <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">{title}</h2>
-      <span className="rounded-full px-2.5 py-0.5 text-xs font-bold bg-gray-100 text-gray-500">
-        {count}
-      </span>
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">{title}</h2>
+          <span className="rounded-full px-2.5 py-0.5 text-xs font-bold bg-gray-100 text-gray-500">
+            {count}
+          </span>
+        </div>
+        {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+      </div>
     </div>
   )
 }
@@ -49,14 +62,14 @@ export default async function MatchesPage() {
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) redirect('/login')
 
-  // Fetch user's own profile (for shared interest calculation + navbar)
   const { data: myProfile } = await supabase
     .from('profiles')
-    .select('full_name, username, avatar_url, interests, budget_min')
+    .select('full_name, username, avatar_url, interests, budget_min, embedding')
     .eq('id', user.id)
     .single()
 
   const myInterests: string[] = (myProfile?.interests ?? []) as string[]
+  const myEmbedding = (myProfile as any)?.embedding as number[] | null
 
   // Fetch all non-declined matches involving this user
   const { data: matchesRaw } = await supabase
@@ -78,14 +91,13 @@ export default async function MatchesPage() {
     .select('id, participant_a, participant_b')
     .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
 
-  // Build a lookup: otherUserId → conversationId
   const convByUser = new Map<string, string>()
   for (const c of conversations ?? []) {
     const otherId = c.participant_a === user.id ? c.participant_b : c.participant_a
     convByUser.set(otherId, c.id)
   }
 
-  // Process matches into display shape
+  // Process existing matches into display shape
   type ProcessedMatch = {
     matchId: string
     profile: Profile
@@ -101,53 +113,88 @@ export default async function MatchesPage() {
     const shared = otherInterests.filter(i => myInterests.includes(i))
 
     let status: ProcessedMatch['status']
-    if (m.status === 'connected') {
-      status = 'connected'
-    } else if (m.initiated_by === user.id) {
-      status = 'pending_sent'
-    } else {
-      status = 'pending_received'
-    }
+    if (m.status === 'connected') status = 'connected'
+    else if (m.initiated_by === user.id) status = 'pending_sent'
+    else status = 'pending_received'
 
     return {
-      matchId: m.id,
-      profile: other,
-      score: m.score ?? 0,
+      matchId:        m.id,
+      profile:        other,
+      score:          m.score ?? 0,
       status,
       sharedInterests: shared,
-      conversationId: convByUser.get(other.id) ?? null,
+      conversationId:  convByUser.get(other.id) ?? null,
     }
   })
 
-  const connected  = processed.filter(m => m.status === 'connected')
-  const received   = processed.filter(m => m.status === 'pending_received')
-  const sent       = processed.filter(m => m.status === 'pending_sent')
+  const connected = processed.filter(m => m.status === 'connected')
+  const received  = processed.filter(m => m.status === 'pending_received')
+  const sent      = processed.filter(m => m.status === 'pending_sent')
 
-  // Discover: onboarded users not already in a match with current user
+  // ── Discover: IDs already in a match relationship ──────────────────────────
   const matchedIds = new Set(matches.map(m => m.user_a === user.id ? m.user_b : m.user_a))
   matchedIds.add(user.id)
 
-  let discoverQuery = supabase
-    .from('profiles')
-    .select('id, username, full_name, avatar_url, home_city, bio, interests, budget_min')
-    .eq('onboarded', true)
-    .neq('id', user.id)
+  type DiscoverUser = { profile: Profile; sharedInterests: string[]; score: number }
+  let discover: DiscoverUser[] = []
+  let discoverUsedEmbeddings = false
 
-  const excludeArr = [...matchedIds]
-  if (excludeArr.length > 0) {
-    discoverQuery = discoverQuery.not('id', 'in', `(${excludeArr.join(',')})`)
+  if (myEmbedding) {
+    // ── Vector search: find most compatible profiles ───────────────────────
+    type RpcMatch = { id: string; similarity: number }
+    const { data: similarRaw } = await supabase.rpc('match_profiles', {
+      query_embedding: myEmbedding,
+      match_count:     60,
+      exclude_id:      user.id,
+    })
+    const similar = (similarRaw as RpcMatch[] | null) ?? []
+
+    const topRows = similar
+      .filter(r => !matchedIds.has(r.id))
+      .slice(0, 24)
+
+    if (topRows.length > 0) {
+      const { data: discoverProfiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url, home_city, bio, interests, budget_min')
+        .in('id', topRows.map(r => r.id))
+
+      const scoreById = new Map<string, number>(similar.map(r => [r.id, r.similarity]))
+
+      discover = (discoverProfiles ?? [])
+        .map((p: any) => ({
+          profile:         p as Profile,
+          sharedInterests: ((p.interests ?? []) as string[]).filter((i: string) => myInterests.includes(i)),
+          score:           Math.round((scoreById.get(p.id) ?? 0) * 100),
+        }))
+        .sort((a, b) => b.score - a.score)
+
+      discoverUsedEmbeddings = true
+    }
   }
 
-  const { data: discoverRaw } = await discoverQuery.limit(60)
+  if (!discoverUsedEmbeddings) {
+    // ── Fallback: Jaccard sort ─────────────────────────────────────────────
+    let q = supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, home_city, bio, interests, budget_min')
+      .eq('onboarded', true)
+      .neq('id', user.id)
 
-  // Sort discover users by shared interest count descending
-  const discover = (discoverRaw ?? [])
-    .map((p: any) => ({
-      profile: p as Profile,
-      sharedInterests: ((p.interests ?? []) as string[]).filter(i => myInterests.includes(i)),
-    }))
-    .sort((a, b) => b.sharedInterests.length - a.sharedInterests.length)
-    .slice(0, 24)
+    const excludeArr = [...matchedIds]
+    if (excludeArr.length > 0) q = q.not('id', 'in', `(${excludeArr.join(',')})`)
+
+    const { data: discoverRaw } = await q.limit(60)
+
+    discover = (discoverRaw ?? [])
+      .map((p: any) => ({
+        profile:         p as Profile,
+        sharedInterests: ((p.interests ?? []) as string[]).filter((i: string) => myInterests.includes(i)),
+        score:           0,
+      }))
+      .sort((a, b) => b.sharedInterests.length - a.sharedInterests.length)
+      .slice(0, 24)
+  }
 
   const hasAnyMatches = processed.length > 0
 
@@ -226,28 +273,31 @@ export default async function MatchesPage() {
           </section>
         )}
 
-        {/* Empty state for matches section */}
         {!hasAnyMatches && <EmptyBanner />}
 
         {/* ── Discover ──────────────────────────────────────────────────── */}
         {discover.length > 0 && (
           <section>
-            <SectionHeader title="Discover travellers" count={discover.length} />
+            <SectionHeader
+              title="Discover travellers"
+              count={discover.length}
+              subtitle={
+                discoverUsedEmbeddings
+                  ? 'Ranked by travel compatibility'
+                  : 'Ranked by shared interests'
+              }
+            />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {discover.map(({ profile, sharedInterests }, i) => (
+              {discover.map(({ profile, sharedInterests, score }, i) => (
                 <UserCard
                   key={profile.id}
                   index={i}
                   profile={profile}
                   sharedInterests={sharedInterests}
+                  score={score}
                   matchId={null}
                   matchStatus="none"
                   conversationId={null}
-                  badge={
-                    sharedInterests.length > 0
-                      ? `${sharedInterests.length} shared interest${sharedInterests.length > 1 ? 's' : ''}`
-                      : undefined
-                  }
                 />
               ))}
             </div>

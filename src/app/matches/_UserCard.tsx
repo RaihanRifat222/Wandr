@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { motion } from 'motion/react'
 import MatchActions from './_MatchActions'
@@ -27,11 +27,24 @@ function getInitials(name: string | null, username: string | null) {
   return (username ?? '?')[0].toUpperCase()
 }
 
+function compatibilityColor(score: number): string {
+  if (score >= 80) return 'bg-emerald-500'
+  if (score >= 65) return 'bg-brand'
+  if (score >= 50) return 'bg-amber-400'
+  return 'bg-gray-300'
+}
+
+function compatibilityLabel(score: number): string {
+  if (score >= 80) return 'Great match'
+  if (score >= 65) return 'Good match'
+  if (score >= 50) return 'Some overlap'
+  return 'Different styles'
+}
+
 export default function UserCard({
   profile,
   sharedInterests,
   score,
-  badge,
   matchId,
   matchStatus,
   conversationId,
@@ -40,15 +53,15 @@ export default function UserCard({
   profile: Profile
   sharedInterests: string[]
   score?: number
-  badge?: string
   matchId: string | null
   matchStatus: 'none' | 'pending_sent' | 'pending_received' | 'connected'
   conversationId: string | null
   index?: number
 }) {
-  const name    = profile.full_name ?? profile.username ?? 'Unknown'
+  const name     = profile.full_name ?? profile.username ?? 'Unknown'
   const initials = getInitials(profile.full_name, profile.username)
-  const budget  = budgetLabel(profile.budget_min)
+  const budget   = budgetLabel(profile.budget_min)
+  const showBar  = score != null && score > 0 && matchStatus === 'none'
 
   return (
     <motion.div
@@ -80,9 +93,10 @@ export default function UserCard({
                 {budget}
               </span>
             )}
-            {score != null && score > 0 && (
+            {/* Score badge for connected/pending (DB score) */}
+            {score != null && score > 0 && matchStatus !== 'none' && (
               <span className="rounded-full px-2.5 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 ml-auto shrink-0">
-                {score}% match
+                {score}%
               </span>
             )}
           </div>
@@ -91,6 +105,24 @@ export default function UserCard({
           )}
         </div>
       </div>
+
+      {/* Compatibility bar — shown only on Discover cards with an embedding score */}
+      {showBar && (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-400">{compatibilityLabel(score!)}</span>
+            <span className="text-xs font-bold text-gray-700">{score}% compatible</span>
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+            <motion.div
+              className={`h-full rounded-full ${compatibilityColor(score!)}`}
+              initial={{ width: 0 }}
+              animate={{ width: `${score}%` }}
+              transition={{ duration: 0.6, delay: Math.min(index, 12) * 0.04 + 0.2, ease: 'easeOut' }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Bio */}
       {profile.bio && (
@@ -109,11 +141,6 @@ export default function UserCard({
             <span className="text-xs text-gray-400 self-center">+{sharedInterests.length - 4} more</span>
           )}
         </div>
-      )}
-
-      {/* Status badge for context */}
-      {badge && (
-        <p className="text-xs text-gray-400 font-medium">{badge}</p>
       )}
 
       {/* Action buttons */}
