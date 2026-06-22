@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { signOut } from '@/lib/actions/auth'
 import NotificationBell from './NotificationBell'
@@ -22,7 +22,7 @@ export default async function Navbar() {
     : (navUsername?.[0]?.toUpperCase() ?? '?')
 
   return (
-    <nav className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100">
+    <nav className="sticky top-0 z-20 bg-surface/90 backdrop-blur-md border-b border-border">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
 
         {/* Logo */}

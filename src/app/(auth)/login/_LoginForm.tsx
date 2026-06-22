@@ -2,7 +2,10 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'motion/react'
 import { signInWithEmail, signInWithGoogle } from '@/lib/actions/auth'
+
+const fieldVariants = { hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }
 
 type Props = { oauthError?: string }
 
@@ -24,14 +27,29 @@ export default function LoginForm({ oauthError }: Props) {
     <>
       <h2 className="text-xl font-semibold text-gray-800 mb-6">Welcome back</h2>
 
-      {error && (
-        <div role="alert" className="mb-5 rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            role="alert"
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600"
+          >
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <form action={formAction} className="space-y-4">
-        <div>
+      <motion.form
+        action={formAction}
+        className="space-y-4"
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
+      >
+        <motion.div variants={fieldVariants}>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
             Email
           </label>
@@ -44,9 +62,9 @@ export default function LoginForm({ oauthError }: Props) {
             placeholder="you@example.com"
             className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
           />
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div variants={fieldVariants}>
           <div className="flex items-center justify-between mb-1.5">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
@@ -64,16 +82,19 @@ export default function LoginForm({ oauthError }: Props) {
             placeholder="••••••••"
             className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
           />
-        </div>
+        </motion.div>
 
-        <button
+        <motion.button
           type="submit"
           disabled={pending}
+          variants={fieldVariants}
+          whileHover={pending ? undefined : { scale: 1.01 }}
+          whileTap={pending ? undefined : { scale: 0.98 }}
           className="w-full rounded-lg py-3 px-5 bg-brand text-white font-semibold text-sm hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed transition mt-2"
         >
           {pending ? 'Signing in…' : 'Sign in'}
-        </button>
-      </form>
+        </motion.button>
+      </motion.form>
 
       <div className="flex items-center gap-3 my-6">
         <div className="flex-1 h-px bg-gray-200" />
@@ -82,13 +103,15 @@ export default function LoginForm({ oauthError }: Props) {
       </div>
 
       <form action={signInWithGoogle}>
-        <button
+        <motion.button
           type="submit"
-          className="w-full rounded-lg py-3 px-5 bg-white border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition flex items-center justify-center gap-2.5"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full rounded-lg py-3 px-5 bg-surface border border-border text-gray-700 font-medium text-sm hover:bg-sand-dark transition flex items-center justify-center gap-2.5"
         >
           <GoogleIcon />
           Continue with Google
-        </button>
+        </motion.button>
       </form>
 
       <p className="mt-7 text-center text-sm text-gray-500">

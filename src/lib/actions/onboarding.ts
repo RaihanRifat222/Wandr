@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { buildProfileText, generateEmbedding } from '@/lib/embeddings'
 
 type SaveProfileInput = {
   homeCity: string
@@ -38,6 +39,23 @@ export async function saveOnboardingProfile(
     .eq('id', user.id)
 
   if (error) return { error: error.message }
+
+  // Generate embedding after onboarding — non-fatal if it fails
+  try {
+    const text = buildProfileText({
+      interests:    input.interests,
+      travel_style: input.travelStyle,
+      budget_min:   input.budgetMin,
+      home_city:    input.homeCity,
+      bio:          input.bio,
+    })
+    if (text.trim()) {
+      const embedding = await generateEmbedding(text)
+      await supabase.from('profiles').update({ embedding }).eq('id', user.id)
+    }
+  } catch {
+    // Non-fatal
+  }
 
   redirect('/dashboard')
 }

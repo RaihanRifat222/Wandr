@@ -65,10 +65,10 @@ export default async function ConversationPage({
 
       {/* ── Chat container ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col max-w-2xl w-full mx-auto px-0 sm:px-4 py-0 sm:py-6">
-        <div className="flex-1 flex flex-col bg-white sm:rounded-2xl sm:border sm:border-gray-100 overflow-hidden" style={{ minHeight: 'calc(100vh - 56px)' }}>
+        <div className="flex-1 flex flex-col bg-surface sm:rounded-2xl sm:border sm:border-border overflow-hidden" style={{ minHeight: 'calc(100vh - 56px)' }}>
 
           {/* ── Chat header ─────────────────────────────────────────── */}
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-white">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-surface">
             <Link href="/messages" className="text-gray-400 hover:text-gray-700 transition mr-1">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M19 12H5M12 19l-7-7 7-7" />

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useActionState, useRef, useState } from 'react'
 import { createTrip } from '@/lib/actions/trips'
@@ -42,7 +42,7 @@ export default function CreateTripForm() {
 
   return (
     <form action={dispatch}>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
 
         {/* ── Header ────────────────────────────────────────────────── */}
         <div
@@ -77,7 +77,7 @@ export default function CreateTripForm() {
                 {REGIONS.map(r => (
                   <label key={r} className="cursor-pointer">
                     <input type="radio" name="region" value={r} className="sr-only peer" />
-                    <span className="inline-block rounded-full px-4 py-1.5 text-xs font-medium border transition-all select-none cursor-pointer bg-white text-gray-600 border-gray-200 hover:border-gray-300 peer-checked:bg-brand peer-checked:text-white peer-checked:border-brand peer-checked:shadow-sm">
+                    <span className="inline-block rounded-full px-4 py-1.5 text-xs font-medium border transition-all select-none cursor-pointer bg-surface text-gray-600 border-border hover:border-gray-300 peer-checked:bg-brand peer-checked:text-white peer-checked:border-brand peer-checked:shadow-sm">
                       {r}
                     </span>
                   </label>
@@ -174,7 +174,7 @@ export default function CreateTripForm() {
                     value={opt.key}
                     className="sr-only peer"
                   />
-                  <div className="text-left rounded-xl px-4 py-3.5 border-2 transition-all select-none cursor-pointer border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 peer-checked:border-brand peer-checked:bg-orange-50">
+                  <div className="text-left rounded-xl px-4 py-3.5 border-2 transition-all select-none cursor-pointer border-border bg-surface hover:border-gray-300 hover:bg-sand-dark peer-checked:border-brand peer-checked:bg-orange-50">
                     <p className="font-semibold text-xs leading-snug text-gray-800">{opt.label}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{opt.desc}</p>
                   </div>

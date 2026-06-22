@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -51,7 +51,7 @@ function CheckIcon() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
+    <div className="bg-surface rounded-xl border border-border p-6 space-y-5">
       <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">{title}</h2>
       {children}
     </div>
@@ -69,6 +69,12 @@ type ProfileRow = {
   travel_style: Record<string, number>
   interests: string[]
   budget_min: number | null
+  tagline: string | null
+  looking_for: string | null
+  favorite_moment_caption: string | null
+  favorite_moment_image_url: string | null
+  languages_spoken: string[]
+  countries_visited: number | null
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -82,6 +88,7 @@ export default function EditProfileForm({
 }) {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
+  const momentFileRef = useRef<HTMLInputElement>(null)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState(false)
@@ -100,6 +107,17 @@ export default function EditProfileForm({
     ...profile.travel_style,
   })
   const [budgetKey, setBudgetKey] = useState(getBudgetKey(profile.budget_min))
+
+  const [tagline, setTagline] = useState(profile.tagline ?? '')
+  const [lookingFor, setLookingFor] = useState(profile.looking_for ?? '')
+  const [favoriteMomentCaption, setFavoriteMomentCaption] = useState(profile.favorite_moment_caption ?? '')
+  const [favoriteMomentImageUrl, setFavoriteMomentImageUrl] = useState(profile.favorite_moment_image_url ?? '')
+  const [momentUploading, setMomentUploading] = useState(false)
+  const [languagesSpoken, setLanguagesSpoken] = useState<string[]>(profile.languages_spoken ?? [])
+  const [languageInput, setLanguageInput] = useState('')
+  const [countriesVisited, setCountriesVisited] = useState(
+    profile.countries_visited != null ? String(profile.countries_visited) : ''
+  )
 
   const initials = (() => {
     if (fullName.trim()) return fullName.trim().split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
@@ -138,6 +156,48 @@ export default function EditProfileForm({
     } finally {
       setUploading(false)
     }
+  }
+
+  // ── Favorite moment image upload ─────────────────────────────────────────
+
+  async function handleMomentImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setMomentUploading(true)
+    setError(null)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${userId}/favorite-moment-${Date.now()}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('posts')
+        .upload(path, file, { upsert: true })
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage.from('posts').getPublicUrl(path)
+      setFavoriteMomentImageUrl(data.publicUrl)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setMomentUploading(false)
+    }
+  }
+
+  // ── Languages ─────────────────────────────────────────────────────────────
+
+  function addLanguage() {
+    const val = languageInput.trim()
+    if (!val || languagesSpoken.some(l => l.toLowerCase() === val.toLowerCase())) {
+      setLanguageInput('')
+      return
+    }
+    setLanguagesSpoken(prev => [...prev, val])
+    setLanguageInput('')
+  }
+
+  function removeLanguage(lang: string) {
+    setLanguagesSpoken(prev => prev.filter(l => l !== lang))
   }
 
   // ── Username availability check ──────────────────────────────────────────
@@ -180,6 +240,12 @@ export default function EditProfileForm({
         travelStyle,
         budgetMin: opt.min,
         budgetMax: opt.max,
+        tagline,
+        lookingFor,
+        favoriteMomentCaption,
+        favoriteMomentImageUrl,
+        languagesSpoken,
+        countriesVisited: countriesVisited.trim() ? Number(countriesVisited) : null,
       })
 
       if ('error' in result) {
@@ -327,6 +393,40 @@ export default function EditProfileForm({
         </div>
       </Section>
 
+      {/* ── Your vibe ─────────────────────────────────────────────────── */}
+      <Section title="Your vibe">
+        <div className="space-y-4">
+          <label className="block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+              Tagline
+            </span>
+            <input
+              type="text"
+              value={tagline}
+              onChange={e => setTagline(e.target.value.slice(0, 80))}
+              placeholder="e.g. Slow-travel foodie, always chasing sunsets"
+              className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
+            />
+            <p className="text-xs text-gray-400 mt-1 ml-1">
+              One line that sums up who you are — shown right under your name.
+            </p>
+          </label>
+
+          <label className="block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+              What are you looking for in a travel buddy?
+            </span>
+            <textarea
+              value={lookingFor}
+              onChange={e => setLookingFor(e.target.value.slice(0, 300))}
+              placeholder="e.g. Early riser, loves spontaneous detours, not into party hostels…"
+              rows={3}
+              className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition resize-none"
+            />
+          </label>
+        </div>
+      </Section>
+
       {/* ── Interests ─────────────────────────────────────────────────── */}
       <Section title="Interests">
         <div className="flex flex-wrap gap-2">
@@ -346,13 +446,128 @@ export default function EditProfileForm({
                 className={`rounded-full px-4 py-2 text-sm font-medium border transition-all ${
                   active
                     ? 'bg-brand text-white border-brand shadow-sm'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-brand/40 hover:bg-gray-50'
+                    : 'bg-surface text-gray-700 border-border hover:border-brand/40 hover:bg-sand-dark'
                 }`}
               >
                 {interest}
               </button>
             )
           })}
+        </div>
+      </Section>
+
+      {/* ── Favorite travel moment ───────────────────────────────────── */}
+      <Section title="Favorite travel moment">
+        <div className="space-y-4">
+          {favoriteMomentImageUrl ? (
+            <div className="relative">
+              <img
+                src={favoriteMomentImageUrl}
+                alt="Favorite travel moment"
+                className="w-full aspect-[4/3] object-cover rounded-xl"
+              />
+              <button
+                type="button"
+                onClick={() => momentFileRef.current?.click()}
+                disabled={momentUploading}
+                className="absolute bottom-2 right-2 text-xs font-medium bg-black/60 text-white rounded-full px-3 py-1.5 hover:bg-black/80 transition"
+              >
+                {momentUploading ? 'Uploading…' : 'Replace photo'}
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => momentFileRef.current?.click()}
+              className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-12 cursor-pointer hover:border-brand/40 hover:bg-orange-50/30 transition"
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+              </svg>
+              <div className="text-center">
+                <p className="text-sm font-medium text-gray-700">
+                  {momentUploading ? 'Uploading…' : 'Add a photo from your favorite trip'}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">This is the first thing buddies see about your travel story</p>
+              </div>
+            </div>
+          )}
+          <input
+            ref={momentFileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleMomentImageChange}
+          />
+
+          <label className="block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+              What made it special?
+            </span>
+            <textarea
+              value={favoriteMomentCaption}
+              onChange={e => setFavoriteMomentCaption(e.target.value.slice(0, 300))}
+              placeholder="e.g. Watching sunrise over Annapurna after a 3am trek…"
+              rows={3}
+              className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition resize-none"
+            />
+          </label>
+        </div>
+      </Section>
+
+      {/* ── Travel experience ────────────────────────────────────────── */}
+      <Section title="Travel experience">
+        <div className="space-y-5">
+          <label className="block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+              Languages you speak
+            </span>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {languagesSpoken.map(lang => (
+                <span
+                  key={lang}
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-brand/10 text-brand text-xs font-semibold"
+                >
+                  {lang}
+                  <button
+                    type="button"
+                    onClick={() => removeLanguage(lang)}
+                    className="text-brand/60 hover:text-brand"
+                    aria-label={`Remove ${lang}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={languageInput}
+              onChange={e => setLanguageInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ',') {
+                  e.preventDefault()
+                  addLanguage()
+                }
+              }}
+              onBlur={addLanguage}
+              placeholder="e.g. English — press Enter to add"
+              className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+              Countries visited
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={countriesVisited}
+              onChange={e => setCountriesVisited(e.target.value)}
+              placeholder="e.g. 12"
+              className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition"
+            />
+          </label>
         </div>
       </Section>
 
@@ -392,7 +607,7 @@ export default function EditProfileForm({
                 className={`w-full text-left rounded-lg px-5 py-4 border-2 transition-all flex items-center gap-4 ${
                   active
                     ? 'border-brand bg-orange-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    : 'border-border bg-surface hover:border-gray-300'
                 }`}
               >
                 <div className="flex-1">
@@ -423,7 +638,7 @@ export default function EditProfileForm({
       <button
         type="button"
         onClick={handleSave}
-        disabled={isPending || usernameStatus === 'error' || uploading}
+        disabled={isPending || usernameStatus === 'error' || uploading || momentUploading}
         className="w-full rounded-lg py-3 bg-brand text-white font-semibold hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed transition"
       >
         {isPending ? 'Saving…' : 'Save changes'}

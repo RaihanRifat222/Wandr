@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { buildProfileText, generateEmbedding } from '@/lib/embeddings'
 
 const BLOCKED_USERNAMES = ['edit', 'me', 'new', 'admin', 'api', 'login', 'signup']
 
@@ -15,6 +16,12 @@ export type UpdateProfileInput = {
   travelStyle: { budget: number; planned: number; solo: number; relaxed: number }
   budgetMin: number
   budgetMax: number
+  tagline: string
+  lookingFor: string
+  favoriteMomentCaption: string
+  favoriteMomentImageUrl: string
+  languagesSpoken: string[]
+  countriesVisited: number | null
 }
 
 export async function updateProfile(
@@ -41,6 +48,12 @@ export async function updateProfile(
       travel_style: input.travelStyle,
       budget_min: input.budgetMin,
       budget_max: input.budgetMax,
+      tagline: input.tagline.trim() || null,
+      looking_for: input.lookingFor.trim() || null,
+      favorite_moment_caption: input.favoriteMomentCaption.trim() || null,
+      favorite_moment_image_url: input.favoriteMomentImageUrl.trim() || null,
+      languages_spoken: input.languagesSpoken,
+      countries_visited: input.countriesVisited,
       updated_at: new Date().toISOString(),
     })
     .eq('id', user.id)
@@ -48,6 +61,27 @@ export async function updateProfile(
   if (error) {
     if (error.code === '23505') return { error: 'That username is already taken.' }
     return { error: error.message }
+  }
+
+  // Regenerate embedding in the background — don't block the response
+  try {
+    const text = buildProfileText({
+      interests:        input.interests,
+      travel_style:     input.travelStyle,
+      budget_min:       input.budgetMin,
+      bio:              input.bio,
+      tagline:          input.tagline,
+      looking_for:      input.lookingFor,
+      home_city:        input.homeCity,
+      languages_spoken: input.languagesSpoken,
+      countries_visited: input.countriesVisited,
+    })
+    if (text.trim()) {
+      const embedding = await generateEmbedding(text)
+      await supabase.from('profiles').update({ embedding }).eq('id', user.id)
+    }
+  } catch {
+    // Non-fatal — profile was saved; embedding can be backfilled later
   }
 
   revalidatePath(`/profile/${clean}`)

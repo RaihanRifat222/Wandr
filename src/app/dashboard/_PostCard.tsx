@@ -1,7 +1,8 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition, useRef } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'motion/react'
 import { toggleLike, addComment, deletePost } from '@/lib/actions/posts'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ type Props = {
   currentUserId: string
   currentUserAvatar: string | null
   currentUserInitials: string
+  onDeleted: () => void
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -92,13 +94,13 @@ function MapPinIcon() {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function PostCard({ post, currentUserId, currentUserAvatar, currentUserInitials }: Props) {
+export default function PostCard({ post, currentUserId, currentUserAvatar, currentUserInitials, onDeleted }: Props) {
   const [liked,          setLiked]          = useState(() => post.post_likes.some(l => l.user_id === currentUserId))
   const [likeCount,      setLikeCount]      = useState(post.post_likes.length)
   const [comments,       setComments]       = useState<Comment[]>(post.post_comments)
   const [commentText,    setCommentText]    = useState('')
   const [showAll,        setShowAll]        = useState(false)
-  const [deleted,        setDeleted]        = useState(false)
+  const [showBurst,      setShowBurst]      = useState(false)
   const [, startTransition]                 = useTransition()
   const commentInputRef                     = useRef<HTMLInputElement>(null)
   const isOwn = post.user_id === currentUserId
@@ -111,6 +113,10 @@ export default function PostCard({ post, currentUserId, currentUserAvatar, curre
     const next = !liked
     setLiked(next)
     setLikeCount(c => c + (next ? 1 : -1))
+    if (next) {
+      setShowBurst(true)
+      setTimeout(() => setShowBurst(false), 500)
+    }
     startTransition(async () => {
       const r = await toggleLike(post.id)
       if (r.error) {
@@ -138,14 +144,12 @@ export default function PostCard({ post, currentUserId, currentUserAvatar, curre
     if (!confirm('Delete this post?')) return
     startTransition(async () => {
       const r = await deletePost(post.id)
-      if (!r.error) setDeleted(true)
+      if (!r.error) onDeleted()
     })
   }
 
-  if (deleted) return null
-
   return (
-    <article className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+    <article className="bg-surface border border-border rounded-xl overflow-hidden">
 
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-4 py-3">
@@ -209,13 +213,27 @@ export default function PostCard({ post, currentUserId, currentUserAvatar, curre
 
       {/* ── Actions row ─────────────────────────────────────────── */}
       <div className="flex items-center gap-4 px-4 pt-3 pb-1">
-        <button
+        <motion.button
           onClick={handleLike}
-          className={`transition-transform active:scale-90 ${liked ? 'text-brand' : 'text-gray-700 hover:text-gray-500'}`}
+          whileTap={{ scale: 0.8 }}
+          className={`relative ${liked ? 'text-brand' : 'text-gray-700 hover:text-gray-500'}`}
           aria-label={liked ? 'Unlike' : 'Like'}
         >
           <HeartIcon filled={liked} />
-        </button>
+          <AnimatePresence>
+            {showBurst && (
+              <motion.span
+                initial={{ opacity: 0.8, scale: 0.6 }}
+                animate={{ opacity: 0, scale: 1.7 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="absolute inset-0 flex items-center justify-center text-brand pointer-events-none"
+              >
+                <HeartIcon filled />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
         <button
           onClick={() => commentInputRef.current?.focus()}
           className="text-gray-700 hover:text-gray-500 transition"

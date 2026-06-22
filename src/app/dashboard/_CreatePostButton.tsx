@@ -1,6 +1,7 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useTransition } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 import { createPost } from '@/lib/actions/posts'
 
@@ -95,9 +96,11 @@ export default function CreatePostButton({ userTrips, avatarUrl, initials, userI
   return (
     <>
       {/* ── Trigger ──────────────────────────────────────────────── */}
-      <div
+      <motion.div
         onClick={() => setOpen(true)}
-        className="bg-white border border-gray-100 rounded-xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition"
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        className="bg-surface border border-border rounded-xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition"
       >
         {avatarUrl ? (
           <img src={avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-100 shrink-0" />
@@ -108,12 +111,25 @@ export default function CreatePostButton({ userTrips, avatarUrl, initials, userI
         )}
         <span className="flex-1 text-sm text-gray-400 select-none">Share a travel moment…</span>
         <span className="rounded-lg px-4 py-1.5 bg-brand text-white text-xs font-semibold shrink-0">Post</span>
-      </div>
+      </motion.div>
 
       {/* ── Modal ────────────────────────────────────────────────── */}
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="bg-surface rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+            >
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
@@ -227,9 +243,10 @@ export default function CreatePostButton({ userTrips, avatarUrl, initials, userI
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

@@ -1,23 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import Navbar from '@/components/Navbar'
-import MatchActions from './_MatchActions'
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function budgetLabel(min: number | null) {
-  if (min == null) return null
-  if (min === 0)   return 'Backpacker'
-  if (min === 50)  return 'Budget'
-  if (min === 100) return 'Mid-range'
-  return 'Comfort'
-}
-
-function getInitials(name: string | null, username: string | null) {
-  if (name?.trim()) return name.trim().split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
-  return (username ?? '?')[0].toUpperCase()
-}
+import UserCard from './_UserCard'
+import EmptyBanner from './_EmptyBanner'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -45,99 +30,6 @@ type MatchRow = {
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
-
-function UserCard({
-  profile,
-  sharedInterests,
-  score,
-  badge,
-  matchId,
-  matchStatus,
-  conversationId,
-}: {
-  profile: Profile
-  sharedInterests: string[]
-  score?: number
-  badge?: string
-  matchId: string | null
-  matchStatus: 'none' | 'pending_sent' | 'pending_received' | 'connected'
-  conversationId: string | null
-}) {
-  const name    = profile.full_name ?? profile.username ?? 'Unknown'
-  const initials = getInitials(profile.full_name, profile.username)
-  const budget  = budgetLabel(profile.budget_min)
-
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col gap-4 hover:shadow-sm transition">
-      {/* Header row */}
-      <div className="flex items-start gap-3">
-        {profile.avatar_url ? (
-          <img
-            src={profile.avatar_url}
-            alt={name}
-            className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 shrink-0"
-          />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-brand/10 text-brand font-serif font-bold flex items-center justify-center shrink-0 text-sm">
-            {initials}
-          </div>
-        )}
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-gray-900 text-sm">{name}</span>
-            {budget && (
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-orange-50 text-brand border border-brand/20">
-                {budget}
-              </span>
-            )}
-            {score != null && score > 0 && (
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 ml-auto shrink-0">
-                {score}% match
-              </span>
-            )}
-          </div>
-          {profile.home_city && (
-            <p className="text-xs text-gray-400 mt-0.5">{profile.home_city}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Bio */}
-      {profile.bio && (
-        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{profile.bio}</p>
-      )}
-
-      {/* Shared interests */}
-      {sharedInterests.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {sharedInterests.slice(0, 4).map(i => (
-            <span key={i} className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-brand/10 text-brand">
-              {i}
-            </span>
-          ))}
-          {sharedInterests.length > 4 && (
-            <span className="text-xs text-gray-400 self-center">+{sharedInterests.length - 4} more</span>
-          )}
-        </div>
-      )}
-
-      {/* Status badge for context */}
-      {badge && (
-        <p className="text-xs text-gray-400 font-medium">{badge}</p>
-      )}
-
-      {/* Action buttons */}
-      <MatchActions
-        matchId={matchId}
-        targetUserId={profile.id}
-        username={profile.username}
-        initialStatus={matchStatus}
-        conversationId={conversationId}
-      />
-    </div>
-  )
-}
 
 function SectionHeader({ title, count }: { title: string; count: number }) {
   return (
@@ -257,13 +149,6 @@ export default async function MatchesPage() {
     .sort((a, b) => b.sharedInterests.length - a.sharedInterests.length)
     .slice(0, 24)
 
-  // Navbar
-  const navUsername = myProfile?.username
-  const profileHref = navUsername ? `/profile/${navUsername}` : '/profile/edit'
-  const navInitials = myProfile?.full_name
-    ? myProfile.full_name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()
-    : (navUsername?.[0]?.toUpperCase() ?? '?')
-
   const hasAnyMatches = processed.length > 0
 
   return (
@@ -284,9 +169,10 @@ export default async function MatchesPage() {
           <section>
             <SectionHeader title="Requests for you" count={received.length} />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {received.map(m => (
+              {received.map((m, i) => (
                 <UserCard
                   key={m.matchId}
+                  index={i}
                   profile={m.profile}
                   sharedInterests={m.sharedInterests}
                   score={m.score}
@@ -304,9 +190,10 @@ export default async function MatchesPage() {
           <section>
             <SectionHeader title="Connected" count={connected.length} />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {connected.map(m => (
+              {connected.map((m, i) => (
                 <UserCard
                   key={m.matchId}
+                  index={i}
                   profile={m.profile}
                   sharedInterests={m.sharedInterests}
                   score={m.score}
@@ -324,9 +211,10 @@ export default async function MatchesPage() {
           <section>
             <SectionHeader title="Pending" count={sent.length} />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sent.map(m => (
+              {sent.map((m, i) => (
                 <UserCard
                   key={m.matchId}
+                  index={i}
                   profile={m.profile}
                   sharedInterests={m.sharedInterests}
                   matchId={m.matchId}
@@ -339,23 +227,17 @@ export default async function MatchesPage() {
         )}
 
         {/* Empty state for matches section */}
-        {!hasAnyMatches && (
-          <div className="bg-white rounded-xl border border-gray-100 px-6 py-10 text-center">
-            <p className="text-sm font-semibold text-gray-500">No connections yet</p>
-            <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">
-              Browse trips and send join requests, or connect directly with travellers below.
-            </p>
-          </div>
-        )}
+        {!hasAnyMatches && <EmptyBanner />}
 
         {/* ── Discover ──────────────────────────────────────────────────── */}
         {discover.length > 0 && (
           <section>
             <SectionHeader title="Discover travellers" count={discover.length} />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {discover.map(({ profile, sharedInterests }) => (
+              {discover.map(({ profile, sharedInterests }, i) => (
                 <UserCard
                   key={profile.id}
+                  index={i}
                   profile={profile}
                   sharedInterests={sharedInterests}
                   matchId={null}

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import EditProfileForm from './_EditProfileForm'
 
 export default async function EditProfilePage() {
@@ -14,7 +15,11 @@ export default async function EditProfilePage() {
 
   const { data: rawProfile } = await supabase
     .from('profiles')
-    .select('username, full_name, avatar_url, bio, travel_style, interests, budget_min, home_city')
+    .select(`
+      username, full_name, avatar_url, bio, travel_style, interests, budget_min, home_city,
+      tagline, looking_for, favorite_moment_caption, favorite_moment_image_url,
+      languages_spoken, countries_visited
+    `)
     .eq('id', user.id)
     .single()
 
@@ -30,11 +35,18 @@ export default async function EditProfilePage() {
     travel_style: Record<string, number>
     interests: string[]
     budget_min: number | null
+    tagline: string | null
+    looking_for: string | null
+    favorite_moment_caption: string | null
+    favorite_moment_image_url: string | null
+    languages_spoken: string[]
+    countries_visited: number | null
   }
 
   return (
-    <main className="min-h-screen bg-background py-10 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="max-w-2xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-8">
           {profile.username && (
             <Link
@@ -51,7 +63,7 @@ export default async function EditProfilePage() {
         </div>
 
         <EditProfileForm profile={profile} userId={user.id} />
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }

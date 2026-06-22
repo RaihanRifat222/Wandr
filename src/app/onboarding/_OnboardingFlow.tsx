@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { saveOnboardingProfile } from '@/lib/actions/onboarding'
@@ -140,7 +140,7 @@ function Step3({
               className={`rounded-full px-4 py-2 text-sm font-medium border transition-all ${
                 active
                   ? 'bg-brand text-white border-brand shadow-sm'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-brand/40 hover:bg-gray-50'
+                  : 'bg-surface text-gray-700 border-border hover:border-brand/40 hover:bg-sand-dark'
               }`}
             >
               {interest}
@@ -221,7 +221,7 @@ function Step5({
               className={`w-full text-left rounded-lg px-5 py-4 border-2 transition-all flex items-center gap-4 ${
                 active
                   ? 'border-brand bg-orange-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+                  : 'border-border bg-surface hover:border-gray-300'
               }`}
             >
               <div className="flex-1">
@@ -321,7 +321,7 @@ export default function OnboardingFlow() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="w-full max-w-lg bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
       {/* Progress bar */}
       <div className="h-1 bg-gray-100">
         <div

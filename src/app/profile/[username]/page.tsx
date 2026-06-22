@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import ConnectButton from './_ConnectButton'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -33,6 +34,38 @@ function CalendarIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  )
+}
+
+function CompassIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+    </svg>
+  )
+}
+
+function GlobeIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+  )
+}
+
+function LanguageIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 8h10M9 3v3M2 11l5-5 5 5M17 21l5-5-5-5M22 16h-9" />
+    </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   )
 }
@@ -160,12 +193,14 @@ export default async function ProfilePage({
   const displayName = profile.full_name ?? username
 
   return (
-    <main className="min-h-screen bg-background py-10 px-4">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="max-w-5xl mx-auto px-4 py-10">
+        <div>
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-5 items-start">
 
           {/* ── Left column ──────────────────────────────────────────── */}
-          <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5">
+          <div className="bg-surface rounded-xl border border-border p-6 space-y-5">
             {/* Avatar + name */}
             <div className="flex flex-col items-center gap-3 text-center">
               {profile.avatar_url ? (
@@ -183,6 +218,13 @@ export default async function ProfilePage({
                 <h1 className="font-serif text-xl font-bold text-gray-900">{displayName}</h1>
                 <p className="text-sm text-gray-400 mt-0.5">@{profile.username}</p>
               </div>
+              {profile.tagline ? (
+                <p className="text-sm text-brand font-medium">{profile.tagline}</p>
+              ) : isOwn ? (
+                <Link href="/profile/edit" className="text-xs text-gray-400 hover:text-brand transition italic">
+                  + Add a tagline so others know your vibe
+                </Link>
+              ) : null}
             </div>
 
             {/* Home city */}
@@ -230,7 +272,7 @@ export default async function ProfilePage({
           <div className="space-y-5">
 
             {/* Stats row */}
-            <div className="bg-white rounded-xl border border-gray-100 px-5 py-4 grid grid-cols-3 divide-x divide-gray-100">
+            <div className="bg-surface rounded-xl border border-border px-5 py-4 grid grid-cols-3 divide-x divide-border">
               {[
                 { value: profilePosts?.length ?? 0, label: 'Posts' },
                 { value: tripCount ?? 0,            label: 'Trips'  },
@@ -243,9 +285,64 @@ export default async function ProfilePage({
               ))}
             </div>
 
+            {/* Favorite travel moment */}
+            {profile.favorite_moment_image_url ? (
+              <div className="bg-surface rounded-xl border border-border overflow-hidden">
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest px-6 pt-6 mb-4">
+                  Favorite travel moment
+                </h2>
+                <img
+                  src={profile.favorite_moment_image_url}
+                  alt="Favorite travel moment"
+                  className="w-full aspect-[16/9] object-cover"
+                />
+                {profile.favorite_moment_caption && (
+                  <p className="text-sm text-gray-600 leading-relaxed px-6 py-5">
+                    {profile.favorite_moment_caption}
+                  </p>
+                )}
+              </div>
+            ) : isOwn ? (
+              <Link
+                href="/profile/edit"
+                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-orange-50/30 transition group"
+              >
+                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand transition shrink-0">
+                  <PlusIcon />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Add your favorite travel moment</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Show buddies what made a trip unforgettable</p>
+                </div>
+              </Link>
+            ) : null}
+
+            {/* Looking for */}
+            {profile.looking_for ? (
+              <div className="bg-surface rounded-xl border border-border p-6">
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <CompassIcon /> Looking for
+                </h2>
+                <p className="text-sm text-gray-600 leading-relaxed">{profile.looking_for}</p>
+              </div>
+            ) : isOwn ? (
+              <Link
+                href="/profile/edit"
+                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-orange-50/30 transition group"
+              >
+                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand transition shrink-0">
+                  <PlusIcon />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Add what you&apos;re looking for in a buddy</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Helps the right travellers find you</p>
+                </div>
+              </Link>
+            ) : null}
+
             {/* Interests */}
             {profile.interests?.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-100 p-6">
+              <div className="bg-surface rounded-xl border border-border p-6">
                 <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Interests</h2>
                 <div className="flex flex-wrap gap-2">
                   {(profile.interests as string[]).map(interest => (
@@ -262,7 +359,7 @@ export default async function ProfilePage({
 
             {/* Travel style */}
             {hasStyle && (
-              <div className="bg-white rounded-xl border border-gray-100 p-6">
+              <div className="bg-surface rounded-xl border border-border p-6">
                 <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-6">
                   Travel style
                 </h2>
@@ -280,8 +377,58 @@ export default async function ProfilePage({
               </div>
             )}
 
+            {/* Travel experience */}
+            {(profile.languages_spoken?.length > 0 || profile.countries_visited != null) ? (
+              <div className="bg-surface rounded-xl border border-border p-6">
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">
+                  Travel experience
+                </h2>
+                <div className="flex flex-wrap gap-6">
+                  {profile.countries_visited != null && (
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-9 h-9 rounded-full bg-brand/10 text-brand shrink-0">
+                        <GlobeIcon />
+                      </span>
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">{profile.countries_visited}</p>
+                        <p className="text-xs text-gray-400">
+                          {profile.countries_visited === 1 ? 'country visited' : 'countries visited'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {profile.languages_spoken?.length > 0 && (
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-9 h-9 rounded-full bg-brand/10 text-brand shrink-0">
+                        <LanguageIcon />
+                      </span>
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">{(profile.languages_spoken as string[]).join(', ')}</p>
+                        <p className="text-xs text-gray-400">
+                          {profile.languages_spoken.length === 1 ? 'language spoken' : 'languages spoken'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : isOwn ? (
+              <Link
+                href="/profile/edit"
+                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-orange-50/30 transition group"
+              >
+                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand transition shrink-0">
+                  <PlusIcon />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Add your travel experience</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Languages you speak, countries you&apos;ve visited</p>
+                </div>
+              </Link>
+            ) : null}
+
             {/* Budget + trips */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+            <div className="bg-surface rounded-xl border border-border p-6 space-y-6">
               {budget && (
                 <div>
                   <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Budget</h2>
@@ -325,7 +472,7 @@ export default async function ProfilePage({
 
             {/* Posts grid */}
             {profilePosts && profilePosts.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <div className="bg-surface rounded-xl border border-border p-5">
                 <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Posts</h2>
                 <div className="grid grid-cols-3 gap-1.5">
                   {profilePosts.map(post => (
@@ -344,6 +491,7 @@ export default async function ProfilePage({
           </div>
         </div>
       </div>
-    </main>
+      </main>
+    </div>
   )
 }

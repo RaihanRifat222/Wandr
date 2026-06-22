@@ -155,7 +155,7 @@ export default async function TripDetailPage({
         </Link>
 
         {/* ── Trip header ───────────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="bg-surface rounded-2xl border border-border overflow-hidden">
           <div className="h-1.5 bg-gradient-to-r from-brand to-orange-400" />
           <div className="p-6 space-y-4">
 
@@ -212,7 +212,7 @@ export default async function TripDetailPage({
 
         {/* ── Host card ────────────────────────────────────────────── */}
         {host && (
-          <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="bg-surface rounded-xl border border-border p-5">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Posted by</p>
             <div className="flex items-center gap-4">
               {host.avatar_url ? (
@@ -263,7 +263,7 @@ export default async function TripDetailPage({
             </div>
 
             {requests.length === 0 ? (
-              <div className="bg-white rounded-xl border border-gray-100 px-6 py-10 text-center">
+              <div className="bg-surface rounded-xl border border-border px-6 py-10 text-center">
                 <p className="text-sm text-gray-400">No requests yet.</p>
                 <p className="text-xs text-gray-300 mt-1">Share your trip link to attract travel buddies.</p>
               </div>
@@ -282,7 +282,7 @@ export default async function TripDetailPage({
                   return (
                     <div
                       key={req.id}
-                      className={`bg-white rounded-xl border border-gray-100 p-5 transition ${
+                      className={`bg-surface rounded-xl border border-border p-5 transition ${
                         req.status === 'declined' ? 'opacity-50' : ''
                       }`}
                     >
@@ -374,7 +374,7 @@ export default async function TripDetailPage({
 
         {/* ── Non-host: join status or join button ──────────────────── */}
         {!isHost && (
-          <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="bg-surface rounded-xl border border-border p-5">
             {myRequest ? (
               <>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">

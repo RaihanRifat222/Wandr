@@ -1,7 +1,8 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'motion/react'
 import { requestToJoin } from '@/lib/actions/trips'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -128,9 +129,17 @@ function GlobeIcon() {
   )
 }
 
+// ─── Card animation variants ────────────────────────────────────────────────
+
+const cardVariants = {
+  enter:  (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0, scale: 0.97 }),
+  center: { x: 0, opacity: 1, scale: 1 },
+  exit:   (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0, scale: 0.97 }),
+}
+
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
-function TripCard({ trip, animKey }: { trip: Trip; animKey: number }) {
+function TripCard({ trip }: { trip: Trip }) {
   const style   = cardStyle(trip.region)
   const budget  = budgetLabel(trip.budget_estimate)
   const dates   = formatDates(trip.start_date, trip.end_date)
@@ -140,7 +149,7 @@ function TripCard({ trip, animKey }: { trip: Trip; animKey: number }) {
   const hostInitials = hostName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
 
   return (
-    <div key={animKey} className="card-enter bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    <div className="bg-surface rounded-2xl shadow-lg border border-border overflow-hidden">
 
       {/* ── Gradient header ──────────────────────────────────────────── */}
       <div
@@ -229,7 +238,7 @@ function TripCard({ trip, animKey }: { trip: Trip; animKey: number }) {
 export default function TripCards({ trips, requestedIds, userId }: Props) {
   const [regionFilter, setRegionFilter] = useState<string | null>(null)
   const [idx, setIdx]                   = useState(0)
-  const [animKey, setAnimKey]           = useState(0)
+  const [direction, setDirection]       = useState(1)
   const [joined, setJoined]             = useState(() => new Set(requestedIds))
   const [justJoined, setJustJoined]     = useState(false)
   const [, startTransition]             = useTransition()
@@ -245,8 +254,8 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
   function advance(dir: 'next' | 'prev') {
     const next = dir === 'next' ? cur + 1 : cur - 1
     if (next < 0 || next >= total) return
+    setDirection(dir === 'next' ? 1 : -1)
     setIdx(next)
-    setAnimKey(k => k + 1)
   }
 
   function handlePass() { advance('next') }
@@ -265,15 +274,20 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
 
   function changeFilter(r: string | null) {
     setRegionFilter(r)
+    setDirection(1)
     setIdx(0)
-    setAnimKey(k => k + 1)
     setJustJoined(false)
   }
 
   // ── Empty: no trips at all ───────────────────────────────────────
   if (trips.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-28 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex flex-col items-center justify-center py-28 text-center"
+      >
         <div className="text-gray-200 mb-6">
           <GlobeIcon />
         </div>
@@ -287,7 +301,7 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
         >
           Post the first trip
         </Link>
-      </div>
+      </motion.div>
     )
   }
 
@@ -312,21 +326,31 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
 
       {/* ── Region filters ───────────────────────────────────────────── */}
       <div className="flex flex-wrap gap-2">
-        {[null, ...REGIONS].map(r => (
-          <button
-            key={r ?? 'all'}
-            type="button"
-            onClick={() => changeFilter(r)}
-            className={[
-              'rounded-full px-4 py-1.5 text-xs font-medium border transition-all',
-              regionFilter === r
-                ? 'bg-brand text-white border-brand shadow-sm'
-                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300',
-            ].join(' ')}
-          >
-            {r ?? 'All regions'}
-          </button>
-        ))}
+        {[null, ...REGIONS].map(r => {
+          const active = regionFilter === r
+          return (
+            <button
+              key={r ?? 'all'}
+              type="button"
+              onClick={() => changeFilter(r)}
+              className={[
+                'relative rounded-full px-4 py-1.5 text-xs font-medium border transition-colors',
+                active
+                  ? 'text-white border-brand'
+                  : 'bg-surface text-gray-600 border-border hover:border-gray-300',
+              ].join(' ')}
+            >
+              {active && (
+                <motion.span
+                  layoutId="regionPillBg"
+                  className="absolute inset-0 rounded-full bg-brand shadow-sm"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{r ?? 'All regions'}</span>
+            </button>
+          )
+        })}
       </div>
 
       {/* ── No results for this filter ───────────────────────────────── */}
@@ -348,46 +372,64 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
         <div className="flex flex-col items-center gap-5">
 
           {/* Card with side-nav arrows */}
-          <div className="relative w-full max-w-md">
+          <div className="relative w-full max-w-md overflow-hidden">
 
             {cur > 0 && (
-              <button
+              <motion.button
                 type="button"
                 aria-label="Previous trip"
                 onClick={() => advance('prev')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md text-gray-500 hover:text-brand hover:border-brand transition flex items-center justify-center text-lg hidden sm:flex"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 z-10 w-10 h-10 rounded-full bg-surface border border-border shadow-md text-gray-500 hover:text-brand hover:border-brand transition flex items-center justify-center text-lg hidden sm:flex"
               >
                 ←
-              </button>
+              </motion.button>
             )}
 
             {cur < total - 1 && (
-              <button
+              <motion.button
                 type="button"
                 aria-label="Next trip"
                 onClick={() => advance('next')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md text-gray-500 hover:text-brand hover:border-brand transition flex items-center justify-center text-lg hidden sm:flex"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 z-10 w-10 h-10 rounded-full bg-surface border border-border shadow-md text-gray-500 hover:text-brand hover:border-brand transition flex items-center justify-center text-lg hidden sm:flex"
               >
                 →
-              </button>
+              </motion.button>
             )}
 
-            <TripCard trip={trip} animKey={animKey} />
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={trip.id}
+                custom={direction}
+                variants={cardVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+              >
+                <TripCard trip={trip} />
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Action bar */}
           <div className="flex items-center gap-4 w-full max-w-md">
 
             {/* Pass */}
-            <button
+            <motion.button
               type="button"
               onClick={handlePass}
               disabled={cur >= total - 1}
-              className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 bg-white border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-gray-300 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition shadow-sm"
+              whileHover={cur >= total - 1 ? undefined : { scale: 1.02 }}
+              whileTap={cur >= total - 1 ? undefined : { scale: 0.96 }}
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 bg-surface border-2 border-border text-gray-600 text-sm font-semibold hover:border-gray-300 hover:bg-sand-dark disabled:opacity-30 disabled:cursor-not-allowed transition shadow-sm"
             >
               <span className="text-base leading-none">✕</span>
               Pass
-            </button>
+            </motion.button>
 
             {/* Counter */}
             <div className="flex flex-col items-center shrink-0 min-w-[3.5rem]">
@@ -401,10 +443,12 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
                 Your trip
               </div>
             ) : (
-              <button
+              <motion.button
                 type="button"
                 onClick={handleJoin}
                 disabled={justJoined || joined.has(trip.id)}
+                whileHover={justJoined || joined.has(trip.id) ? undefined : { scale: 1.02 }}
+                whileTap={justJoined || joined.has(trip.id) ? undefined : { scale: 0.96 }}
                 className={[
                   'flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold transition shadow-sm border-2',
                   justJoined
@@ -415,13 +459,20 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
                 ].join(' ')}
               >
                 {justJoined ? (
-                  <><CheckIcon /> Requested!</>
+                  <motion.span
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                    className="flex items-center gap-2"
+                  >
+                    <CheckIcon /> Requested!
+                  </motion.span>
                 ) : joined.has(trip.id) ? (
                   <><CheckIcon /> Requested</>
                 ) : (
                   <><PlaneIcon /> Join</>
                 )}
-              </button>
+              </motion.button>
             )}
           </div>
 

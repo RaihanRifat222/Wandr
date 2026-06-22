@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { embedText, buildTripEmbeddingInput } from '@/lib/ai/embeddings'
 
 const BUDGET_ESTIMATE_MAP: Record<string, number> = {
   backpacker: 25,
@@ -39,8 +40,7 @@ export async function createTrip(
 
   const budgetEstimate = budgetTier ? (BUDGET_ESTIMATE_MAP[budgetTier] ?? null) : null
 
-  const { error } = await supabase.from('trips').insert({
-    host_id: user.id,
+  const tripFields = {
     destination,
     region,
     start_date: startDate,
@@ -48,6 +48,20 @@ export async function createTrip(
     group_size: buddiesWanted + 1,
     budget_estimate: budgetEstimate,
     description,
+  }
+
+  let embedding: number[] | null = null
+  try {
+    embedding = await embedText(buildTripEmbeddingInput(tripFields))
+  } catch {
+    // Search indexing is best-effort — the trip should still get created
+    // even if the embeddings API is unreachable.
+  }
+
+  const { error } = await supabase.from('trips').insert({
+    host_id: user.id,
+    ...tripFields,
+    embedding,
     status: 'open',
   })
 
@@ -55,6 +69,80 @@ export async function createTrip(
 
   revalidatePath('/dashboard')
   redirect('/dashboard')
+}
+
+export type TripSearchResult = {
+  id: string
+  destination: string
+  region: string | null
+  start_date: string | null
+  end_date: string | null
+  group_size: number
+  budget_estimate: number | null
+  description: string | null
+  similarity: number
+  host: {
+    id: string
+    username: string | null
+    full_name: string | null
+    avatar_url: string | null
+    home_city: string | null
+    tagline: string | null
+  } | null
+}
+
+export async function searchTrips(
+  query: string
+): Promise<{ error: string } | { results: TripSearchResult[] }> {
+  const trimmed = query.trim()
+  if (!trimmed) return { error: 'Describe what you\'re looking for' }
+
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) redirect('/login')
+
+  let queryEmbedding: number[]
+  try {
+    queryEmbedding = await embedText(trimmed)
+  } catch {
+    return { error: 'Search is temporarily unavailable. Please try again.' }
+  }
+
+  const { data: matches, error } = await supabase.rpc('search_trips', {
+    query_embedding: queryEmbedding,
+    match_count: 30,
+  })
+
+  if (error) return { error: error.message }
+  if (!matches || matches.length === 0) return { results: [] }
+
+  const hostIds = [...new Set(matches.map((m: { host_id: string }) => m.host_id))]
+  const { data: hosts } = await supabase
+    .from('profiles')
+    .select('id, username, full_name, avatar_url, home_city, tagline')
+    .in('id', hostIds)
+
+  const hostById = new Map((hosts ?? []).map(h => [h.id, h]))
+
+  const results: TripSearchResult[] = matches.map((m: {
+    id: string; destination: string; region: string | null
+    start_date: string | null; end_date: string | null
+    group_size: number; budget_estimate: number | null
+    description: string | null; host_id: string; similarity: number
+  }) => ({
+    id: m.id,
+    destination: m.destination,
+    region: m.region,
+    start_date: m.start_date,
+    end_date: m.end_date,
+    group_size: m.group_size,
+    budget_estimate: m.budget_estimate,
+    description: m.description,
+    similarity: m.similarity,
+    host: hostById.get(m.host_id) ?? null,
+  }))
+
+  return { results }
 }
 
 export async function requestToJoin(

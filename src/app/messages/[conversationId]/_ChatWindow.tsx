@@ -192,7 +192,7 @@ export default function ChatWindow({
       </div>
 
       {/* ── Input ─────────────────────────────────────────────────── */}
-      <div className="border-t border-gray-100 bg-white px-4 py-3">
+      <div className="border-t border-border bg-surface px-4 py-3">
         <div className="flex items-end gap-3">
           <textarea
             ref={inputRef}
