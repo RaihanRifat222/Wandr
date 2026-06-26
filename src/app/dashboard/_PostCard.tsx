@@ -26,6 +26,7 @@ type Comment = {
 export type PostData = {
   id: string
   image_url: string
+  media_urls: string[] | null
   caption: string | null
   created_at: string
   user_id: string
@@ -89,6 +90,98 @@ function MapPinIcon() {
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
     </svg>
+  )
+}
+
+function ChevronIcon({ dir }: { dir: 'left' | 'right' }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {dir === 'left' ? <polyline points="15 18 9 12 15 6"/> : <polyline points="9 18 15 12 9 6"/>}
+    </svg>
+  )
+}
+
+function MultiIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+      <rect x="7" y="3" width="14" height="14" rx="2" opacity="0.7"/>
+      <rect x="3" y="7" width="14" height="14" rx="2"/>
+    </svg>
+  )
+}
+
+function isVideo(url: string) {
+  return /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url)
+}
+
+function MediaCarousel({ urls }: { urls: string[] }) {
+  const [idx, setIdx] = useState(0)
+
+  if (urls.length === 0) return null
+
+  const cur = urls[idx]
+
+  return (
+    <div className="relative aspect-square w-full overflow-hidden bg-black">
+      {isVideo(cur) ? (
+        <video
+          key={cur}
+          src={cur}
+          className="w-full h-full object-contain"
+          controls
+          playsInline
+          preload="metadata"
+        />
+      ) : (
+        <img
+          key={cur}
+          src={cur}
+          alt={`Photo ${idx + 1} of ${urls.length}`}
+          className="w-full h-full object-cover"
+        />
+      )}
+
+      {/* Prev / Next */}
+      {urls.length > 1 && (
+        <>
+          {idx > 0 && (
+            <button
+              type="button"
+              onClick={() => setIdx(i => i - 1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition"
+            >
+              <ChevronIcon dir="left" />
+            </button>
+          )}
+          {idx < urls.length - 1 && (
+            <button
+              type="button"
+              onClick={() => setIdx(i => i + 1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition"
+            >
+              <ChevronIcon dir="right" />
+            </button>
+          )}
+
+          {/* Dots */}
+          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {urls.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIdx(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${i === idx ? 'bg-white scale-125' : 'bg-white/50'}`}
+              />
+            ))}
+          </div>
+
+          {/* Multi-photo badge (top right) */}
+          <div className="absolute top-2 right-2 pointer-events-none">
+            <MultiIcon />
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 
@@ -202,14 +295,10 @@ export default function PostCard({ post, currentUserId, currentUserAvatar, curre
         </div>
       </div>
 
-      {/* ── Image ───────────────────────────────────────────────── */}
-      <div className="aspect-square w-full overflow-hidden bg-gray-100">
-        <img
-          src={post.image_url}
-          alt={post.caption ?? 'Post image'}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      {/* ── Media carousel ──────────────────────────────────────── */}
+      <MediaCarousel
+        urls={post.media_urls?.length ? post.media_urls : [post.image_url]}
+      />
 
       {/* ── Actions row ─────────────────────────────────────────── */}
       <div className="flex items-center gap-4 px-4 pt-3 pb-1">

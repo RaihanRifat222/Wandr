@@ -5,21 +5,23 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 export async function createPost({
-  imageUrl,
+  mediaUrls,
   caption,
   tripId,
 }: {
-  imageUrl: string
+  mediaUrls: string[]
   caption: string | null
   tripId: string | null
 }): Promise<{ error?: string }> {
+  if (!mediaUrls.length) return { error: 'At least one photo or video is required' }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const { error } = await supabase.from('posts').insert({
     user_id:   user.id,
-    image_url: imageUrl,
+    image_url: mediaUrls[0],
     caption:   caption?.trim() || null,
     trip_id:   tripId || null,
   })
