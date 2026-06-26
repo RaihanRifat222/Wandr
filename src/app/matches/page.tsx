@@ -199,7 +199,7 @@ export default async function MatchesPage() {
   const hasAnyMatches = processed.length > 0
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-10">
@@ -305,6 +305,6 @@ export default async function MatchesPage() {
         )}
 
       </main>
-    </div>
+    </>
   )
 }

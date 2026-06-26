@@ -245,9 +245,9 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
   const [justJoined, setJustJoined]     = useState(false)
   const [, startTransition]             = useTransition()
 
-  const filtered = regionFilter
-    ? trips.filter(t => t.region === regionFilter)
-    : trips
+  const filtered = trips
+    .filter(t => regionFilter === null || t.region === regionFilter)
+    .filter(t => !joined.has(t.id))
 
   const total = filtered.length
   const cur   = Math.min(idx, Math.max(0, total - 1))
@@ -268,10 +268,7 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
     setJoined(prev => new Set([...prev, id]))
     setJustJoined(true)
     startTransition(async () => { await requestToJoin(id) })
-    setTimeout(() => {
-      setJustJoined(false)
-      advance('next')
-    }, 900)
+    setTimeout(() => { setJustJoined(false) }, 900)
   }
 
   function changeFilter(r: string | null) {

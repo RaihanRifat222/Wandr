@@ -156,13 +156,31 @@ export async function requestToJoin(
 
   if (authError || !user) return { error: 'Not authenticated' }
 
-  const { error } = await supabase.from('trip_requests').insert({
-    trip_id: tripId,
-    requester_id: user.id,
-    status: 'pending',
-  })
+  const { data: request, error } = await supabase
+    .from('trip_requests')
+    .insert({ trip_id: tripId, requester_id: user.id, status: 'pending' })
+    .select('id')
+    .single()
 
   if (error) return { error: error.message }
+
+  // Notify the trip host
+  const [{ data: trip }, { data: profile }] = await Promise.all([
+    supabase.from('trips').select('host_id, destination').eq('id', tripId).single(),
+    supabase.from('profiles').select('full_name, username').eq('id', user.id).single(),
+  ])
+
+  if (trip && trip.host_id !== user.id && request) {
+    const requesterName = profile?.full_name ?? profile?.username ?? 'Someone'
+    await supabase.from('notifications').insert({
+      user_id:  trip.host_id,
+      type:     'trip_request',
+      title:    `${requesterName} wants to join your trip to ${trip.destination}`,
+      body:     request.id,
+      ref_id:   tripId,
+      ref_type: 'trip_request',
+    })
+  }
 
   revalidatePath(`/trips/${tripId}`)
   return {}
@@ -226,6 +244,23 @@ export async function acceptTripRequest(
     { onConflict: 'participant_a,participant_b' }
   )
 
+  // Notify the requester their request was accepted
+  const { data: trip } = await supabase
+    .from('trips')
+    .select('destination')
+    .eq('id', tripId)
+    .single()
+
+  if (trip) {
+    await supabase.from('notifications').insert({
+      user_id:  req.requester_id,
+      type:     'trip_accepted',
+      title:    `Your request to join ${trip.destination} was accepted!`,
+      ref_id:   tripId,
+      ref_type: 'trip',
+    })
+  }
+
   revalidatePath(`/trips/${tripId}`)
   revalidatePath('/messages')
   return {}
@@ -239,6 +274,13 @@ export async function declineTripRequest(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Not authenticated' }
 
+  const { data: req } = await supabase
+    .from('trip_requests')
+    .select('requester_id')
+    .eq('id', requestId)
+    .eq('trip_id', tripId)
+    .single()
+
   const { error } = await supabase
     .from('trip_requests')
     .update({ status: 'declined', updated_at: new Date().toISOString() })
@@ -246,6 +288,25 @@ export async function declineTripRequest(
     .eq('trip_id', tripId)
 
   if (error) return { error: error.message }
+
+  // Notify the requester their request was declined
+  if (req) {
+    const { data: trip } = await supabase
+      .from('trips')
+      .select('destination')
+      .eq('id', tripId)
+      .single()
+
+    if (trip) {
+      await supabase.from('notifications').insert({
+        user_id:  req.requester_id,
+        type:     'trip_declined',
+        title:    `Your request to join ${trip.destination} was not accepted`,
+        ref_id:   tripId,
+        ref_type: 'trip',
+      })
+    }
+  }
 
   revalidatePath(`/trips/${tripId}`)
   return {}

@@ -10,7 +10,7 @@ export default async function NewTripPage() {
   if (error || !user) redirect('/login')
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
@@ -20,6 +20,6 @@ export default async function NewTripPage() {
         </div>
         <CreateTripForm />
       </main>
-    </div>
+    </>
   )
 }

@@ -193,7 +193,7 @@ export default async function ProfilePage({
   const displayName = profile.full_name ?? username
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 py-10">
         <div>
@@ -492,6 +492,6 @@ export default async function ProfilePage({
         </div>
       </div>
       </main>
-    </div>
+    </>
   )
 }

@@ -145,7 +145,7 @@ export default async function TripDetailPage({
   const buddiesNeeded = trip.group_size - 1
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-4">
 
@@ -415,6 +415,6 @@ export default async function TripDetailPage({
         )}
 
       </main>
-    </div>
+    </>
   )
 }

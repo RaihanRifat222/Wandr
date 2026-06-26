@@ -266,9 +266,14 @@ export default function TripsBrowser({ trips, requestedIds, userId }: Props) {
             className="space-y-4"
           >
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                {results.length} {results.length === 1 ? 'trip' : 'trips'} matching &ldquo;{query}&rdquo;
-              </p>
+              {(() => {
+                const visible = results.filter(t => t.host?.id !== userId && !joined.has(t.id)).length
+                return (
+                  <p className="text-sm text-gray-500">
+                    {visible} {visible === 1 ? 'trip' : 'trips'} matching &ldquo;{query}&rdquo;
+                  </p>
+                )
+              })()}
               <button
                 type="button"
                 onClick={clearSearch}
@@ -291,21 +296,23 @@ export default function TripsBrowser({ trips, requestedIds, userId }: Props) {
               </div>
             ) : (
               <div className="space-y-3">
-                {results.map((trip, i) => (
-                  <motion.div
-                    key={trip.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25, delay: i * 0.03 }}
-                  >
-                    <ResultCard
-                      trip={trip}
-                      userId={userId}
-                      joined={joined.has(trip.id)}
-                      onJoin={handleJoin}
-                    />
-                  </motion.div>
-                ))}
+                {results
+                  .filter(trip => trip.host?.id !== userId && !joined.has(trip.id))
+                  .map((trip, i) => (
+                    <motion.div
+                      key={trip.id}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: i * 0.03 }}
+                    >
+                      <ResultCard
+                        trip={trip}
+                        userId={userId}
+                        joined={joined.has(trip.id)}
+                        onJoin={handleJoin}
+                      />
+                    </motion.div>
+                  ))}
               </div>
             )}
           </motion.div>

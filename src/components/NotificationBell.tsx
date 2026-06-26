@@ -1,7 +1,8 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { acceptTripRequest, declineTripRequest } from '@/lib/actions/trips'
 import Link from 'next/link'
 
 type Notification = {
@@ -25,7 +26,8 @@ function timeAgo(d: string) {
 
 function notifLink(n: Notification) {
   if (n.ref_type === 'post') return '/dashboard'
-  if (n.ref_type === 'trip') return n.ref_id ? `/trips/${n.ref_id}` : '/trips'
+  if (n.ref_type === 'trip' || n.ref_type === 'trip_request')
+    return n.ref_id ? `/trips/${n.ref_id}` : '/trips'
   return '#'
 }
 
@@ -44,6 +46,27 @@ function TypeIcon({ type }: { type: string }) {
       </svg>
     </div>
   )
+  if (type === 'trip_request') return (
+    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8520A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 4 17 4 16.8 5.4 15.5 5.5l-4 .5L5 2H3l2 6.5L2.5 12 3 13.5l4-.5 4.5 6.5z"/>
+      </svg>
+    </div>
+  )
+  if (type === 'trip_accepted') return (
+    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+  )
+  if (type === 'trip_declined') return (
+    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </div>
+  )
   return (
     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -52,6 +75,73 @@ function TypeIcon({ type }: { type: string }) {
     </div>
   )
 }
+
+// ── Inline accept/decline for trip_request notifications ─────────────────────
+
+function TripRequestActions({
+  requestId,
+  tripId,
+  onDone,
+}: {
+  requestId: string
+  tripId: string
+  onDone: (result: 'accepted' | 'declined') => void
+}) {
+  const [status, setStatus] = useState<'accepted' | 'declined' | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  if (status === 'accepted') {
+    return (
+      <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        Accepted
+      </span>
+    )
+  }
+  if (status === 'declined') {
+    return (
+      <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-gray-100 text-gray-400">
+        Declined
+      </span>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2 mt-2">
+      <button
+        type="button"
+        disabled={isPending}
+        onClick={e => {
+          e.preventDefault()
+          startTransition(async () => {
+            await acceptTripRequest(requestId, tripId)
+            setStatus('accepted')
+            onDone('accepted')
+          })
+        }}
+        className="rounded-lg px-3 py-1.5 bg-brand text-white text-xs font-semibold hover:brightness-95 disabled:opacity-50 transition"
+      >
+        Accept
+      </button>
+      <button
+        type="button"
+        disabled={isPending}
+        onClick={e => {
+          e.preventDefault()
+          startTransition(async () => {
+            await declineTripRequest(requestId, tripId)
+            setStatus('declined')
+            onDone('declined')
+          })
+        }}
+        className="rounded-lg px-3 py-1.5 border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition"
+      >
+        Decline
+      </button>
+    </div>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 export default function NotificationBell({ userId }: { userId: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -72,7 +162,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
       .then(({ data }) => { if (data) setNotifications(data) })
   }, [userId])
 
-  // Realtime: push new notifications in live
+  // Realtime: push new notifications live
   useEffect(() => {
     const channel = supabase
       .channel(`notifs:${userId}`)
@@ -102,7 +192,6 @@ export default function NotificationBell({ userId }: { userId: string }) {
   async function handleToggle() {
     const next = !open
     setOpen(next)
-    // Mark all as read when opening
     if (next && unread > 0) {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
       await supabase
@@ -156,31 +245,68 @@ export default function NotificationBell({ userId }: { userId: string }) {
               <p className="text-sm text-gray-400">No notifications yet</p>
             </div>
           ) : (
-            <div className="max-h-[360px] overflow-y-auto divide-y divide-gray-50">
-              {notifications.map(n => (
-                <Link
-                  key={n.id}
-                  href={notifLink(n)}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition ${
-                    !n.read ? 'bg-orange-50/50' : ''
-                  }`}
-                >
-                  <TypeIcon type={n.type} />
+            <div className="max-h-[400px] overflow-y-auto divide-y divide-gray-50">
+              {notifications.map(n => {
+                const isTripRequest = n.type === 'trip_request'
 
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 leading-snug">{n.title}</p>
-                    {n.body && (
-                      <p className="text-xs text-gray-500 mt-0.5 truncate italic">"{n.body}"</p>
+                if (isTripRequest) {
+                  // body = request_id, ref_id = trip_id
+                  const requestId = n.body
+                  const tripId    = n.ref_id
+
+                  return (
+                    <div
+                      key={n.id}
+                      className={`flex items-start gap-3 px-4 py-3 ${!n.read ? 'bg-orange-50/50' : ''}`}
+                    >
+                      <TypeIcon type={n.type} />
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          href={tripId ? `/trips/${tripId}` : '/trips'}
+                          onClick={() => setOpen(false)}
+                          className="text-sm text-gray-800 leading-snug hover:text-brand transition"
+                        >
+                          {n.title}
+                        </Link>
+                        {requestId && tripId && (
+                          <TripRequestActions
+                            requestId={requestId}
+                            tripId={tripId}
+                            onDone={() => {}}
+                          />
+                        )}
+                        <p className="text-xs text-gray-400 mt-1.5">{timeAgo(n.created_at)}</p>
+                      </div>
+                      {!n.read && (
+                        <div className="w-2 h-2 rounded-full bg-brand mt-1.5 shrink-0" />
+                      )}
+                    </div>
+                  )
+                }
+
+                return (
+                  <Link
+                    key={n.id}
+                    href={notifLink(n)}
+                    onClick={() => setOpen(false)}
+                    className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition ${
+                      !n.read ? 'bg-orange-50/50' : ''
+                    }`}
+                  >
+                    <TypeIcon type={n.type} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-800 leading-snug">{n.title}</p>
+                      {n.body && n.type !== 'trip_request' && (
+                        <p className="text-xs text-gray-500 mt-0.5 truncate italic">&ldquo;{n.body}&rdquo;</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-1">{timeAgo(n.created_at)}</p>
+                    </div>
+                    {!n.read && (
+                      <div className="w-2 h-2 rounded-full bg-brand mt-1.5 shrink-0" />
                     )}
-                    <p className="text-xs text-gray-400 mt-1">{timeAgo(n.created_at)}</p>
-                  </div>
-
-                  {!n.read && (
-                    <div className="w-2 h-2 rounded-full bg-brand mt-1.5 shrink-0" />
-                  )}
-                </Link>
-              ))}
+                  </Link>
+                )
+              })}
             </div>
           )}
         </div>

@@ -44,7 +44,7 @@ export default async function EditProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
       <main className="max-w-2xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-8">
@@ -64,6 +64,6 @@ export default async function EditProfilePage() {
 
         <EditProfileForm profile={profile} userId={user.id} />
       </main>
-    </div>
+    </>
   )
 }

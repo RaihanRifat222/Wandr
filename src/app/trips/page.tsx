@@ -18,6 +18,7 @@ export default async function BrowseTripsPage() {
         host:profiles!host_id ( id, username, full_name, avatar_url, home_city )
       `)
       .eq('status', 'open')
+      .neq('host_id', user.id)
       .order('created_at', { ascending: false })
       .limit(50),
     supabase
@@ -28,8 +29,10 @@ export default async function BrowseTripsPage() {
 
   const requestedIds = (myRequests ?? []).map(r => r.trip_id as string)
 
+  const browsableTrips = (trips ?? []).filter(t => !requestedIds.includes(t.id))
+
   const regionCounts = Object.entries(
-    (trips ?? []).reduce<Record<string, number>>((acc, t) => {
+    browsableTrips.reduce<Record<string, number>>((acc, t) => {
       const region = t.region ?? 'Other'
       acc[region] = (acc[region] ?? 0) + 1
       return acc
@@ -39,14 +42,14 @@ export default async function BrowseTripsPage() {
     .sort((a, b) => b.count - a.count)
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 items-start">
-        <TripsBrowser trips={(trips ?? []) as any} requestedIds={requestedIds} userId={user.id} />
+        <TripsBrowser trips={browsableTrips as any} requestedIds={requestedIds} userId={user.id} />
         <div className="hidden lg:block">
-          <TripsSidebar regionCounts={regionCounts} totalTrips={trips?.length ?? 0} />
+          <TripsSidebar regionCounts={regionCounts} totalTrips={browsableTrips.length} />
         </div>
       </main>
-    </div>
+    </>
   )
 }

@@ -60,7 +60,7 @@ export default async function ConversationPage({
   const otherInitials = getInitials(other?.full_name ?? null, other?.username ?? null)
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
 
       {/* ── Chat container ────────────────────────────────────────────── */}

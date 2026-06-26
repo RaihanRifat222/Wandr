@@ -180,7 +180,7 @@ export default async function FeedPage() {
   const showProfileNudge = !myProfile?.tagline || !myProfile?.favorite_moment_image_url
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-[470px_1fr] gap-8 items-start">
@@ -207,6 +207,6 @@ export default async function FeedPage() {
           />
         </div>
       </main>
-    </div>
+    </>
   )
 }

@@ -31,13 +31,13 @@ export default async function MessagesPage() {
   })
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         <h1 className="font-serif text-2xl font-bold text-gray-900 mb-6">Messages</h1>
         <MessagesList currentUserId={user.id} conversations={conversations} />
       </main>
-    </div>
+    </>
   )
 }
