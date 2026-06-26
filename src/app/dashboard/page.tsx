@@ -114,7 +114,7 @@ export default async function FeedPage() {
     supabase
       .from('posts')
       .select(`
-        id, image_url, caption, created_at, user_id,
+        id, image_url, media_urls, caption, created_at, user_id,
         author:profiles!user_id ( id, username, full_name, avatar_url, home_city, interests, travel_style, budget_min, budget_max, embedding ),
         trip:trips!trip_id ( id, destination, region ),
         post_likes ( user_id ),

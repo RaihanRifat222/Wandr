@@ -20,10 +20,11 @@ export async function createPost({
   if (!user) redirect('/login')
 
   const { error } = await supabase.from('posts').insert({
-    user_id:   user.id,
-    image_url: mediaUrls[0],
-    caption:   caption?.trim() || null,
-    trip_id:   tripId || null,
+    user_id:    user.id,
+    image_url:  mediaUrls[0],
+    media_urls: mediaUrls,
+    caption:    caption?.trim() || null,
+    trip_id:    tripId || null,
   })
 
   if (error) return { error: error.message }
