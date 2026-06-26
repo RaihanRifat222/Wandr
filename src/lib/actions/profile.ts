@@ -125,7 +125,7 @@ export async function acceptBuddyRequest(
 
   const { data: match } = await supabase
     .from('matches')
-    .select('id, user_a, user_b')
+    .select('id, user_a, user_b, initiated_by')
     .eq('id', matchId)
     .eq('status', 'pending')
     .single()
@@ -144,6 +144,20 @@ export async function acceptBuddyRequest(
     { participant_a: match.user_a, participant_b: match.user_b, match_id: matchId },
     { onConflict: 'participant_a,participant_b' }
   )
+
+  // Notify the person who sent the original request
+  const notifyId = match.initiated_by ?? (match.user_a === user.id ? match.user_b : match.user_a)
+  if (notifyId !== user.id) {
+    const { data: me } = await supabase
+      .from('profiles').select('full_name, username').eq('id', user.id).single()
+    const myName = me?.full_name ?? me?.username ?? 'Someone'
+    await supabase.from('notifications').insert({
+      user_id:  notifyId,
+      type:     'buddy_accepted',
+      title:    `${myName} accepted your connection request`,
+      ref_type: 'match',
+    })
+  }
 
   revalidatePath('/messages')
   revalidatePath('/matches')
@@ -171,27 +185,36 @@ export async function sendBuddyRequest(
   targetUserId: string
 ): Promise<{ error: string } | undefined> {
   const supabase = await createClient()
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) redirect('/login')
 
   const ids = [user.id, targetUserId].sort()
 
-  const { error } = await supabase.from('matches').upsert(
+  const { data: match, error } = await supabase.from('matches').upsert(
     {
-      user_a: ids[0],
-      user_b: ids[1],
-      score: 0,
-      status: 'pending',
+      user_a:       ids[0],
+      user_b:       ids[1],
+      score:        0,
+      status:       'pending',
       initiated_by: user.id,
-      updated_at: new Date().toISOString(),
+      updated_at:   new Date().toISOString(),
     },
     { onConflict: 'user_a,user_b' }
-  )
+  ).select('id').single()
 
   if (error) return { error: error.message }
-  revalidatePath('/profile')
+
+  // Notify the target user
+  const { data: me } = await supabase
+    .from('profiles').select('full_name, username').eq('id', user.id).single()
+  const myName = me?.full_name ?? me?.username ?? 'Someone'
+  await supabase.from('notifications').insert({
+    user_id:  targetUserId,
+    type:     'buddy_request',
+    title:    `${myName} wants to connect with you`,
+    ref_id:   match?.id ?? null,
+    ref_type: 'match',
+  })
+
+  revalidatePath('/matches')
 }

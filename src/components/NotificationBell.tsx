@@ -25,9 +25,10 @@ function timeAgo(d: string) {
 }
 
 function notifLink(n: Notification) {
-  if (n.ref_type === 'post') return '/dashboard'
-  if (n.ref_type === 'trip' || n.ref_type === 'trip_request')
-    return n.ref_id ? `/trips/${n.ref_id}` : '/trips'
+  if (n.ref_type === 'post')                                  return '/dashboard'
+  if (n.ref_type === 'trip' || n.ref_type === 'trip_request') return n.ref_id ? `/trips/${n.ref_id}` : '/trips'
+  if (n.ref_type === 'match')                                 return '/matches'
+  if (n.ref_type === 'conversation')                          return n.ref_id ? `/messages/${n.ref_id}` : '/messages'
   return '#'
 }
 
@@ -64,6 +65,27 @@ function TypeIcon({ type }: { type: string }) {
     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </div>
+  )
+  if (type === 'buddy_request') return (
+    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+      </svg>
+    </div>
+  )
+  if (type === 'buddy_accepted') return (
+    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    </div>
+  )
+  if (type === 'message') return (
+    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       </svg>
     </div>
   )
