@@ -20,7 +20,7 @@ export default function AppShell({
   return (
     <div className="flex min-h-screen bg-background">
       {sidebar}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 pb-16 md:pb-0">
         {children}
       </div>
     </div>

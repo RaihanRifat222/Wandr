@@ -146,7 +146,7 @@ export default function LeftSidebar({ profileHref }: { profileHref: string }) {
   }
 
   return (
-    <aside className="w-[220px] shrink-0 sticky top-0 h-screen flex flex-col bg-[#FDF8F2] border-r border-[#EDE0CA] overflow-hidden">
+    <aside className="hidden md:flex w-[220px] shrink-0 sticky top-0 h-screen flex-col bg-[#FDF8F2] border-r border-[#EDE0CA] overflow-hidden">
 
       {/* Logo */}
       <div className="px-5 pt-6 pb-4">

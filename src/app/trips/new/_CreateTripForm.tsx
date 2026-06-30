@@ -46,7 +46,7 @@ export default function CreateTripForm() {
 
         {/* ── Header ────────────────────────────────────────────────── */}
         <div
-          className="relative overflow-hidden px-8 pt-8 pb-7"
+          className="relative overflow-hidden px-5 pt-7 pb-6 sm:px-8 sm:pt-8 sm:pb-7"
           style={{ background: 'linear-gradient(135deg, #E8520A 0%, #f97316 55%, #fb923c 100%)' }}
         >
           {/* Geometric accents */}
@@ -56,7 +56,7 @@ export default function CreateTripForm() {
           <p className="text-orange-100 text-sm mt-1">Share your plans and find your perfect travel buddy</p>
         </div>
 
-        <div className="px-8 py-8 space-y-8">
+        <div className="px-4 py-6 sm:px-8 sm:py-8 space-y-8">
 
           {/* ── Destination ───────────────────────────────────────────── */}
           <section className="space-y-3">

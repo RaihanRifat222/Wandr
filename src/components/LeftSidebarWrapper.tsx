@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import LeftSidebar from './LeftSidebar'
+import BottomNav from './BottomNav'
 
 export default async function LeftSidebarWrapper() {
   const supabase = await createClient()
@@ -16,5 +17,10 @@ export default async function LeftSidebarWrapper() {
     ? `/profile/${profile.username}`
     : '/profile/edit'
 
-  return <LeftSidebar profileHref={profileHref} />
+  return (
+    <>
+      <LeftSidebar profileHref={profileHref} />
+      <BottomNav profileHref={profileHref} />
+    </>
+  )
 }
