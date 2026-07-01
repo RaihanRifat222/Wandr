@@ -211,7 +211,7 @@ export default function PostCard({ post, currentUserId, currentUserAvatar, curre
       setTimeout(() => setShowBurst(false), 500)
     }
     startTransition(async () => {
-      const r = await toggleLike(post.id)
+      const r = await toggleLike(post.id, liked)
       if (r.error) {
         setLiked(!next)
         setLikeCount(c => c + (next ? -1 : 1))

@@ -34,21 +34,15 @@ export async function createPost({
 }
 
 export async function toggleLike(
-  postId: string
+  postId: string,
+  currentlyLiked: boolean
 ): Promise<{ liked: boolean; error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { liked: false, error: 'Not authenticated' }
+  if (!user) return { liked: currentlyLiked, error: 'Not authenticated' }
 
-  const { data: existing } = await supabase
-    .from('post_likes')
-    .select('id')
-    .eq('post_id', postId)
-    .eq('user_id', user.id)
-    .maybeSingle()
-
-  if (existing) {
-    await supabase.from('post_likes').delete().eq('id', existing.id)
+  if (currentlyLiked) {
+    await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', user.id)
     return { liked: false }
   } else {
     await supabase.from('post_likes').insert({ post_id: postId, user_id: user.id })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import { signInWithEmail, signInWithGoogle } from '@/lib/actions/auth'
@@ -8,6 +8,13 @@ import { signInWithEmail, signInWithGoogle } from '@/lib/actions/auth'
 const fieldVariants = { hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }
 
 type Props = { oauthError?: string }
+
+function isWebView() {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  return /FBAN|FBAV|Instagram|Twitter|Line|MicroMessenger|WebView|wv/.test(ua)
+    || ((/iPhone|iPod|iPad/.test(ua)) && !/Safari/.test(ua))
+}
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -20,6 +27,9 @@ const GoogleIcon = () => (
 
 export default function LoginForm({ oauthError }: Props) {
   const [state, formAction, pending] = useActionState(signInWithEmail, null)
+  const [inWebView, setInWebView] = useState(false)
+
+  useEffect(() => { setInWebView(isWebView()) }, [])
 
   const error = state?.error ?? (oauthError === 'oauth' ? 'Google sign-in failed. Please try again.' : undefined)
 
@@ -102,17 +112,24 @@ export default function LoginForm({ oauthError }: Props) {
         <div className="flex-1 h-px bg-gray-200" />
       </div>
 
-      <form action={signInWithGoogle}>
-        <motion.button
-          type="submit"
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full rounded-lg py-3 px-5 bg-surface border border-border text-gray-700 font-medium text-sm hover:bg-sand-dark transition flex items-center justify-center gap-2.5"
-        >
-          <GoogleIcon />
-          Continue with Google
-        </motion.button>
-      </form>
+      {inWebView ? (
+        <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+          <p className="font-semibold mb-1">Open in your browser to use Google sign-in</p>
+          <p className="text-amber-700 text-xs">Google doesn&apos;t allow sign-in from in-app browsers (e.g. Facebook, Instagram). Tap the menu and choose <strong>&quot;Open in Chrome&quot;</strong> or <strong>&quot;Open in Safari&quot;</strong>.</p>
+        </div>
+      ) : (
+        <form action={signInWithGoogle}>
+          <motion.button
+            type="submit"
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full rounded-lg py-3 px-5 bg-surface border border-border text-gray-700 font-medium text-sm hover:bg-sand-dark transition flex items-center justify-center gap-2.5"
+          >
+            <GoogleIcon />
+            Continue with Google
+          </motion.button>
+        </form>
+      )}
 
       <p className="mt-7 text-center text-sm text-gray-500">
         Don&apos;t have an account?{' '}
