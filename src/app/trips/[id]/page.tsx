@@ -156,7 +156,7 @@ export default async function TripDetailPage({
 
         {/* ── Trip header ───────────────────────────────────────────── */}
         <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-          <div className="h-1.5 bg-gradient-to-r from-brand to-orange-400" />
+          <div className="h-1.5 bg-gradient-to-r from-brand to-pine" />
           <div className="p-6 space-y-4">
 
             {/* Badges */}
@@ -240,7 +240,7 @@ export default async function TripDetailPage({
               {host.username && !isHost && (
                 <Link
                   href={`/profile/${host.username}`}
-                  className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-brand border border-brand/20 hover:bg-orange-50 transition"
+                  className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-brand border border-brand/20 hover:bg-brand/10 transition"
                 >
                   View profile
                 </Link>
@@ -309,7 +309,7 @@ export default async function TripDetailPage({
                               <span className="text-xs text-gray-400">@{r.username}</span>
                             )}
                             {budg && (
-                              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-orange-50 text-brand border border-brand/20">
+                              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-brand/10 text-brand border border-brand/20">
                                 {budg}
                               </span>
                             )}

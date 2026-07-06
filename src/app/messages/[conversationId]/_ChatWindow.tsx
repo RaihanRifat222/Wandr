@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { motion } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessage } from '@/lib/actions/messages'
+import ChatMarkdown from '@/components/ChatMarkdown'
 
 type Message = {
   id: string
@@ -11,11 +13,21 @@ type Message = {
   sender_id: string
 }
 
-type OtherUser = {
+type Member = {
   id: string
   full_name: string | null
   username: string | null
   avatar_url: string | null
+}
+
+const BOT_USERNAME = 'wandr_ai'
+
+function SparkleIcon({ className }: { className?: string }) {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" />
+    </svg>
+  )
 }
 
 function getInitials(name: string | null, username: string | null) {
@@ -41,13 +53,16 @@ export default function ChatWindow({
   conversationId,
   initialMessages,
   userId,
-  other,
+  members,
+  isGroup,
 }: {
   conversationId: string
   initialMessages: Message[]
   userId: string
-  other: OtherUser
+  members: Member[]
+  isGroup: boolean
 }) {
+  const memberById = new Map(members.map(m => [m.id, m]))
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
@@ -118,8 +133,6 @@ export default function ChatWindow({
     else days.push({ label, messages: [msg] })
   }
 
-  const otherInitials = getInitials(other.full_name, other.username)
-
   return (
     <div className="flex flex-col h-full">
 
@@ -144,6 +157,9 @@ export default function ChatWindow({
 
             {dayMsgs.map((msg, i) => {
               const isMe = msg.sender_id === userId
+              const sender = memberById.get(msg.sender_id)
+              const isBot = sender?.username === BOT_USERNAME
+              const senderInitials = getInitials(sender?.full_name ?? null, sender?.username ?? null)
               const prevMsg = dayMsgs[i - 1]
               const isFirst = !prevMsg || prevMsg.sender_id !== msg.sender_id
 
@@ -152,28 +168,37 @@ export default function ChatWindow({
                   key={msg.id}
                   className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
                 >
-                  {/* Other person's avatar — only on first bubble in a group */}
+                  {/* Sender's avatar — only on first bubble in a run */}
                   {!isMe && (
                     <div className={`w-7 h-7 shrink-0 ${isFirst ? 'opacity-100' : 'opacity-0'}`}>
-                      {other.avatar_url ? (
-                        <img src={other.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" />
+                      {sender?.avatar_url ? (
+                        <img src={sender.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" />
                       ) : (
                         <div className="w-7 h-7 rounded-full bg-brand/10 text-brand text-xs font-bold flex items-center justify-center font-serif">
-                          {otherInitials}
+                          {senderInitials}
                         </div>
                       )}
                     </div>
                   )}
 
                   <div className={`max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                    {/* Sender name — group chats only, first bubble in a run */}
+                    {isGroup && !isMe && isFirst && (
+                      <span className={`flex items-center gap-1 text-[11px] font-medium mb-0.5 px-1 ${isBot ? 'text-pine' : 'text-gray-400'}`}>
+                        {isBot && <SparkleIcon />}
+                        {sender?.full_name ?? sender?.username ?? 'Unknown'}
+                      </span>
+                    )}
                     <div
-                      className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${
+                      className={`px-4 py-2.5 rounded-2xl break-words ${
                         isMe
                           ? 'bg-brand text-white rounded-br-sm'
+                          : isBot
+                          ? 'bg-pine/10 text-gray-800 border border-pine/20 rounded-bl-sm'
                           : 'bg-gray-100 text-gray-800 rounded-bl-sm'
                       }`}
                     >
-                      {msg.content}
+                      <ChatMarkdown content={msg.content} />
                     </div>
                     {/* Timestamp on last message in group */}
                     {(i === dayMsgs.length - 1 || dayMsgs[i + 1]?.sender_id !== msg.sender_id) && (
@@ -205,16 +230,21 @@ export default function ChatWindow({
             className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition max-h-32 disabled:opacity-50"
             style={{ lineHeight: '1.5' }}
           />
-          <button
+          <motion.button
             type="button"
             onClick={handleSend}
             disabled={!input.trim() || sending}
+            whileHover={!input.trim() || sending ? undefined : { scale: 1.04 }}
+            whileTap={!input.trim() || sending ? undefined : { scale: 0.94 }}
             className="rounded-xl px-4 py-2.5 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed transition shrink-0"
           >
             {sending ? '…' : 'Send'}
-          </button>
+          </motion.button>
         </div>
-        <p className="text-[10px] text-gray-300 mt-1.5 text-right">Enter to send · Shift+Enter for new line</p>
+        <p className="text-[10px] text-gray-300 mt-1.5 text-right">
+          {isGroup && <span className="text-gray-400">Mention @wandr for trip help · </span>}
+          Enter to send · Shift+Enter for new line
+        </p>
       </div>
     </div>
   )

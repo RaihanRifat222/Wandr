@@ -216,7 +216,7 @@ export default function CreatePostButton({ userTrips, avatarUrl, initials, userI
                       onClick={() => fileInputRef.current?.click()}
                       onDrop={handleDrop}
                       onDragOver={e => e.preventDefault()}
-                      className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-12 cursor-pointer hover:border-brand/40 hover:bg-orange-50/30 transition"
+                      className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-12 cursor-pointer hover:border-brand/40 hover:bg-brand/5 transition"
                     >
                       <PhotoIcon />
                       <div className="text-center">

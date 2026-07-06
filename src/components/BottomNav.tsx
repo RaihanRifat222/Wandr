@@ -12,7 +12,7 @@ const NAV = [
 ]
 
 function Icon({ name, active }: { name: string; active: boolean }) {
-  const color = active ? '#E8520A' : '#9CA3AF'
+  const color = active ? 'var(--brand)' : 'var(--muted)'
   const w = 22, h = 22
 
   if (name === 'home') return (
@@ -61,7 +61,7 @@ export default function BottomNav({ profileHref }: { profileHref: string }) {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-200">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-surface border-t border-border">
       <div className="flex items-stretch h-16">
         {navWithProfile.map(item => {
           const active = isActive(item.href)

@@ -14,9 +14,28 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <main className="min-h-screen bg-background flex">
 
       {/* ── Brand panel — desktop only ─────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-brand via-orange-500 to-orange-600 px-14 py-16 flex-col justify-between">
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10" />
-        <div className="absolute bottom-10 -left-20 w-72 h-72 rounded-full bg-white/10" />
+      <div
+        className="hidden lg:flex lg:w-1/2 relative overflow-hidden px-14 py-16 flex-col justify-between"
+        style={{ background: 'linear-gradient(160deg, var(--pine) 0%, var(--brand) 100%)' }}
+      >
+        {/* Topographic contour lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.14]" viewBox="0 0 400 700" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M-20 120 Q100 90 180 130 Q260 170 420 110" stroke="white" strokeWidth="1.5" fill="none" />
+          <path d="M-20 170 Q110 140 190 178 Q270 216 420 158" stroke="white" strokeWidth="1.5" fill="none" />
+          <path d="M-20 220 Q120 190 200 224 Q280 258 420 204" stroke="white" strokeWidth="1.5" fill="none" />
+        </svg>
+
+        {/* Ridge silhouette along the bottom */}
+        <svg className="absolute bottom-0 left-0 w-full opacity-[0.16]" viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 110 L60 70 L110 100 L170 55 L230 95 L290 62 L340 88 L400 60 L400 160 L0 160 Z" fill="white" />
+        </svg>
+
+        {/* Trail path with summit pin */}
+        <svg className="absolute right-10 bottom-16 w-28 h-40 opacity-90" viewBox="0 0 100 140" aria-hidden="true">
+          <path d="M14 140 Q30 108 24 84 Q18 58 46 46 Q72 34 62 12" stroke="white" strokeOpacity="0.55" strokeWidth="2" strokeDasharray="1 6" strokeLinecap="round" fill="none" />
+          <circle cx="62" cy="12" r="5" fill="white" />
+          <circle cx="62" cy="12" r="9" fill="none" stroke="white" strokeOpacity="0.5" strokeWidth="1.5" />
+        </svg>
 
         <motion.span
           initial={{ opacity: 0, y: -10 }}

@@ -40,7 +40,7 @@ export default function SignupForm() {
             animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600"
+            className="overflow-hidden rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"
           >
             {state.error}
           </motion.div>
@@ -55,7 +55,7 @@ export default function SignupForm() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-3 text-sm text-emerald-700"
+            className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-sm text-emerald-400"
           >
             {state.message}
           </motion.div>
@@ -118,9 +118,9 @@ export default function SignupForm() {
             </div>
 
             {inWebView ? (
-              <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm text-amber-400">
                 <p className="font-semibold mb-1">Open in your browser to use Google sign-in</p>
-                <p className="text-amber-700 text-xs">Google doesn&apos;t allow sign-in from in-app browsers (e.g. Facebook, Instagram). Tap the menu and choose <strong>&quot;Open in Chrome&quot;</strong> or <strong>&quot;Open in Safari&quot;</strong>.</p>
+                <p className="text-amber-400/80 text-xs">Google doesn&apos;t allow sign-in from in-app browsers (e.g. Facebook, Instagram). Tap the menu and choose <strong>&quot;Open in Chrome&quot;</strong> or <strong>&quot;Open in Safari&quot;</strong>.</p>
               </div>
             ) : (
               <form action={signInWithGoogle}>

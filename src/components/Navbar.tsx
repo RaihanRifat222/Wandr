@@ -26,7 +26,7 @@ export default async function Navbar() {
         {/* Logo — only visible on mobile where the sidebar is hidden */}
         <Link href="/dashboard" className="md:hidden flex items-center gap-1 select-none mr-auto">
           <span className="font-serif text-xl font-bold text-brand leading-none">Wandr</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8520A" stroke="#E8520A" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--brand)" stroke="var(--brand)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
             <circle cx="12" cy="10" r="3" fill="white" stroke="none"/>
           </svg>
@@ -53,7 +53,7 @@ export default async function Navbar() {
           <form action={signOut}>
             <button
               type="submit"
-              className="hidden sm:block text-sm text-gray-500 hover:text-red-600 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition"
+              className="hidden sm:block text-sm text-gray-500 hover:text-red-400 font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition"
             >
               Log out
             </button>

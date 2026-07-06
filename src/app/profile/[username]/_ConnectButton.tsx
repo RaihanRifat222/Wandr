@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { motion } from 'motion/react'
 import { sendBuddyRequest, acceptBuddyRequest } from '@/lib/actions/profile'
 import type { MatchStatus } from './page'
 
@@ -31,7 +32,9 @@ export default function ConnectButton({
   if (status === 'pending_received' && matchId) {
     return (
       <div className="space-y-2">
-        <button
+        <motion.button
+          whileHover={isPending ? undefined : { scale: 1.02 }}
+          whileTap={isPending ? undefined : { scale: 0.97 }}
           onClick={() =>
             startTransition(async () => {
               const r = await acceptBuddyRequest(matchId)
@@ -43,7 +46,7 @@ export default function ConnectButton({
           className="w-full rounded-lg py-2.5 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-60 transition"
         >
           {isPending ? 'Accepting…' : 'Accept request'}
-        </button>
+        </motion.button>
         {error && <p className="text-xs text-red-500 text-center">{error}</p>}
       </div>
     )
@@ -61,7 +64,9 @@ export default function ConnectButton({
   // No connection yet — show Connect
   return (
     <div className="space-y-2">
-      <button
+      <motion.button
+        whileHover={isPending ? undefined : { scale: 1.02 }}
+        whileTap={isPending ? undefined : { scale: 0.97 }}
         onClick={() =>
           startTransition(async () => {
             const r = await sendBuddyRequest(targetUserId)
@@ -73,7 +78,7 @@ export default function ConnectButton({
         className="w-full rounded-lg py-2.5 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-60 transition"
       >
         {isPending ? 'Sending…' : 'Connect'}
-      </button>
+      </motion.button>
       {error && <p className="text-xs text-red-500 text-center">{error}</p>}
     </div>
   )

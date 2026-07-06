@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useActionState, useRef, useState } from 'react'
+import { motion } from 'motion/react'
 import { createTrip } from '@/lib/actions/trips'
 
 const REGIONS = ['Europe', 'Asia', 'Americas', 'Africa', 'Oceania', 'Middle East']
@@ -47,13 +48,13 @@ export default function CreateTripForm() {
         {/* ── Header ────────────────────────────────────────────────── */}
         <div
           className="relative overflow-hidden px-5 pt-7 pb-6 sm:px-8 sm:pt-8 sm:pb-7"
-          style={{ background: 'linear-gradient(135deg, #E8520A 0%, #f97316 55%, #fb923c 100%)' }}
+          style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--pine) 100%)' }}
         >
           {/* Geometric accents */}
           <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
           <div className="absolute right-12 -bottom-10 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
           <h1 className="font-serif text-2xl font-bold text-white">Post a Trip</h1>
-          <p className="text-orange-100 text-sm mt-1">Share your plans and find your perfect travel buddy</p>
+          <p className="text-white/75 text-sm mt-1">Share your plans and find your perfect travel buddy</p>
         </div>
 
         <div className="px-4 py-6 sm:px-8 sm:py-8 space-y-8">
@@ -174,7 +175,7 @@ export default function CreateTripForm() {
                     value={opt.key}
                     className="sr-only peer"
                   />
-                  <div className="text-left rounded-xl px-4 py-3.5 border-2 transition-all select-none cursor-pointer border-border bg-surface hover:border-gray-300 hover:bg-sand-dark peer-checked:border-brand peer-checked:bg-orange-50">
+                  <div className="text-left rounded-xl px-4 py-3.5 border-2 transition-all select-none cursor-pointer border-border bg-surface hover:border-gray-300 hover:bg-sand-dark peer-checked:border-brand peer-checked:bg-brand/10">
                     <p className="font-semibold text-xs leading-snug text-gray-800">{opt.label}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{opt.desc}</p>
                   </div>
@@ -217,13 +218,15 @@ export default function CreateTripForm() {
             >
               Cancel
             </a>
-            <button
+            <motion.button
               type="submit"
               disabled={isPending}
+              whileHover={isPending ? undefined : { scale: 1.02 }}
+              whileTap={isPending ? undefined : { scale: 0.97 }}
               className="flex-1 rounded-lg py-3 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm"
             >
               {isPending ? 'Posting…' : 'Post trip'}
-            </button>
+            </motion.button>
           </div>
 
         </div>

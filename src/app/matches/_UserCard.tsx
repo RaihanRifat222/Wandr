@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react'
 import MatchActions from './_MatchActions'
+import TiltCard from '@/components/TiltCard'
 
 type Profile = {
   id: string
@@ -69,8 +70,8 @@ export default function UserCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(index, 12) * 0.04 }}
       whileHover={{ y: -3 }}
-      className="bg-surface rounded-xl border border-border p-5 flex flex-col gap-4 hover:shadow-md hover:border-brand/20 transition"
     >
+    <TiltCard max={5} className="bg-surface rounded-xl border border-border p-5 flex flex-col gap-4 hover:shadow-md hover:border-brand/20 transition">
       {/* Header row */}
       <div className="flex items-start gap-3">
         {profile.avatar_url ? (
@@ -89,7 +90,7 @@ export default function UserCard({
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-gray-900 text-sm">{name}</span>
             {budget && (
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-orange-50 text-brand border border-brand/20">
+              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-brand/10 text-brand border border-brand/20">
                 {budget}
               </span>
             )}
@@ -151,6 +152,7 @@ export default function UserCard({
         initialStatus={matchStatus}
         conversationId={conversationId}
       />
+    </TiltCard>
     </motion.div>
   )
 }

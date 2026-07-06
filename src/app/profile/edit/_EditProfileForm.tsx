@@ -478,7 +478,7 @@ export default function EditProfileForm({
           ) : (
             <div
               onClick={() => momentFileRef.current?.click()}
-              className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-12 cursor-pointer hover:border-brand/40 hover:bg-orange-50/30 transition"
+              className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-12 cursor-pointer hover:border-brand/40 hover:bg-brand/5 transition"
             >
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
@@ -606,7 +606,7 @@ export default function EditProfileForm({
                 onClick={() => setBudgetKey(opt.key)}
                 className={`w-full text-left rounded-lg px-5 py-4 border-2 transition-all flex items-center gap-4 ${
                   active
-                    ? 'border-brand bg-orange-50'
+                    ? 'border-brand bg-brand/10'
                     : 'border-border bg-surface hover:border-gray-300'
                 }`}
               >

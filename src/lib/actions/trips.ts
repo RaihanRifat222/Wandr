@@ -227,23 +227,6 @@ export async function acceptTripRequest(
     { onConflict: 'user_a,user_b' }
   )
 
-  // Open a conversation between them (idempotent)
-  const { data: match } = await supabase
-    .from('matches')
-    .select('id')
-    .eq('user_a', ids[0])
-    .eq('user_b', ids[1])
-    .single()
-
-  await supabase.from('conversations').upsert(
-    {
-      participant_a: ids[0],
-      participant_b: ids[1],
-      match_id:      match?.id ?? null,
-    },
-    { onConflict: 'participant_a,participant_b' }
-  )
-
   // Notify the requester their request was accepted
   const { data: trip } = await supabase
     .from('trips')
@@ -251,13 +234,45 @@ export async function acceptTripRequest(
     .eq('id', tripId)
     .single()
 
+  // Add the requester to the trip's shared group chat (host + everyone
+  // accepted so far), creating it on the first acceptance.
+  let { data: groupConversation } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('trip_id', tripId)
+    .eq('is_group', true)
+    .maybeSingle()
+
+  if (!groupConversation) {
+    const { data: newConversation, error: convError } = await supabase
+      .from('conversations')
+      .insert({ trip_id: tripId, is_group: true, title: trip?.destination ?? 'Trip chat' })
+      .select('id')
+      .single()
+
+    if (convError || !newConversation) return { error: convError?.message ?? 'Could not create the group chat' }
+    groupConversation = newConversation
+
+    await supabase
+      .from('conversation_participants')
+      .insert({ conversation_id: groupConversation.id, user_id: user.id })
+  }
+
+  await supabase
+    .from('conversation_participants')
+    .upsert(
+      { conversation_id: groupConversation.id, user_id: req.requester_id },
+      { onConflict: 'conversation_id,user_id', ignoreDuplicates: true }
+    )
+
   if (trip) {
     await supabase.from('notifications').insert({
       user_id:  req.requester_id,
       type:     'trip_accepted',
       title:    `Your request to join ${trip.destination} was accepted!`,
-      ref_id:   tripId,
-      ref_type: 'trip',
+      body:     `You're now in the ${trip.destination} group chat.`,
+      ref_id:   groupConversation.id,
+      ref_type: 'conversation',
     })
   }
 

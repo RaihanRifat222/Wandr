@@ -3,9 +3,14 @@
 import Link from 'next/link'
 import { motion } from 'motion/react'
 
+type Member = { id: string; full_name: string | null; username: string | null; avatar_url: string | null }
+
 type Conversation = {
   id: string
-  other: { full_name: string | null; username: string | null; avatar_url: string | null } | null
+  isGroup: boolean
+  title: string | null
+  other: Member | null
+  members: Member[]
   lastMsg: { content: string; created_at: string; sender_id: string } | null
 }
 
@@ -32,6 +37,33 @@ function ChatIcon() {
   )
 }
 
+function GroupAvatar({ members }: { members: Member[] }) {
+  const shown = members.slice(0, 2)
+  return (
+    <div className="relative w-11 h-11 shrink-0">
+      {shown.map((m, i) => {
+        const inits = getInitials(m.full_name, m.username)
+        const offset = i === 0 ? 'top-0 left-0' : 'bottom-0 right-0'
+        return m.avatar_url ? (
+          <img
+            key={m.id}
+            src={m.avatar_url}
+            alt={m.full_name ?? m.username ?? ''}
+            className={`absolute ${offset} w-7 h-7 rounded-full object-cover ring-2 ring-surface`}
+          />
+        ) : (
+          <div
+            key={m.id}
+            className={`absolute ${offset} w-7 h-7 rounded-full bg-brand/10 text-brand font-serif font-bold flex items-center justify-center text-[10px] ring-2 ring-surface`}
+          >
+            {inits}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function MessagesList({ currentUserId, conversations }: {
   currentUserId: string
   conversations: Conversation[]
@@ -45,7 +77,7 @@ export default function MessagesList({ currentUserId, conversations }: {
         className="relative overflow-hidden bg-surface rounded-2xl border border-border px-6 py-20 text-center"
       >
         <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-brand/5" />
-        <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-orange-50" />
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-brand/10" />
 
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
@@ -104,9 +136,14 @@ export default function MessagesList({ currentUserId, conversations }: {
 
   return (
     <div className="bg-surface rounded-xl border border-border divide-y divide-gray-100 overflow-hidden">
-      {conversations.map(({ id, other, lastMsg }, i) => {
-        const name = other?.full_name ?? other?.username ?? 'Unknown'
+      {conversations.map(({ id, isGroup, title, other, members, lastMsg }, i) => {
+        const name = isGroup
+          ? (title ?? 'Trip group chat')
+          : (other?.full_name ?? other?.username ?? 'Unknown')
         const inits = getInitials(other?.full_name ?? null, other?.username ?? null)
+        const subtitle = isGroup && !lastMsg
+          ? members.map(m => m.full_name ?? m.username).filter(Boolean).join(', ')
+          : null
         return (
           <motion.div
             key={id}
@@ -115,7 +152,9 @@ export default function MessagesList({ currentUserId, conversations }: {
             transition={{ duration: 0.25, delay: i * 0.04 }}
           >
             <Link href={`/messages/${id}`} className="flex items-center gap-4 px-5 py-4 hover:bg-sand-dark transition group">
-              {other?.avatar_url ? (
+              {isGroup ? (
+                <GroupAvatar members={members} />
+              ) : other?.avatar_url ? (
                 <img src={other.avatar_url} alt={name} className="w-11 h-11 rounded-full object-cover ring-2 ring-gray-100 shrink-0 group-hover:ring-brand/30 transition" />
               ) : (
                 <div className="w-11 h-11 rounded-full bg-brand/10 text-brand font-serif font-bold flex items-center justify-center shrink-0 text-sm">
@@ -130,9 +169,9 @@ export default function MessagesList({ currentUserId, conversations }: {
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5 truncate">
-                  {lastMsg
+                  {subtitle ?? (lastMsg
                     ? (lastMsg.sender_id === currentUserId ? 'You: ' : '') + lastMsg.content
-                    : 'No messages yet — say hello!'}
+                    : 'No messages yet — say hello!')}
                 </p>
               </div>
             </Link>

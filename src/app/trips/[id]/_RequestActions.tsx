@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { motion } from 'motion/react'
 import { acceptTripRequest, declineTripRequest } from '@/lib/actions/trips'
 
 type Status = 'pending' | 'accepted' | 'declined'
@@ -36,9 +37,11 @@ export default function RequestActions({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <button
+      <motion.button
         type="button"
         disabled={isPending}
+        whileHover={isPending ? undefined : { scale: 1.03 }}
+        whileTap={isPending ? undefined : { scale: 0.96 }}
         onClick={() =>
           startTransition(async () => {
             const r = await acceptTripRequest(requestId, tripId)
@@ -49,7 +52,7 @@ export default function RequestActions({
         className="rounded-lg px-4 py-2 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-50 transition"
       >
         Accept
-      </button>
+      </motion.button>
       <button
         type="button"
         disabled={isPending}

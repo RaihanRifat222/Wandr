@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { motion } from 'motion/react'
+import ElevationProgress from '@/components/ElevationProgress'
 
 type RegionCount = { region: string; count: number }
 
@@ -32,7 +33,7 @@ export default function TripsSidebar({ regionCounts, totalTrips }: {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="relative overflow-hidden rounded-xl bg-gradient-to-br from-brand to-orange-500 p-5 text-white"
+        className="relative overflow-hidden rounded-xl bg-gradient-to-br from-brand to-pine p-5 text-white"
       >
         <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/10" />
         <div className="relative flex items-center gap-2 mb-2">
@@ -66,14 +67,7 @@ export default function TripsSidebar({ regionCounts, totalTrips }: {
                   <span className="font-medium text-gray-600">{region}</span>
                   <span className="text-gray-400">{count}</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(count / max) * 100}%` }}
-                    transition={{ duration: 0.5, delay: 0.2 + i * 0.05, ease: 'easeOut' }}
-                    className="h-full rounded-full bg-brand"
-                  />
-                </div>
+                <ElevationProgress progress={(count / max) * 100} height={12} delay={0.2 + i * 0.05} />
               </motion.div>
             ))}
           </div>

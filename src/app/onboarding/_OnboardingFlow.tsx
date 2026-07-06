@@ -1,7 +1,9 @@
 ﻿'use client'
 
 import { useState, useTransition } from 'react'
+import { motion } from 'motion/react'
 import { saveOnboardingProfile } from '@/lib/actions/onboarding'
+import ElevationProgress from '@/components/ElevationProgress'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -220,7 +222,7 @@ function Step5({
               onClick={() => onSelect(opt.key)}
               className={`w-full text-left rounded-lg px-5 py-4 border-2 transition-all flex items-center gap-4 ${
                 active
-                  ? 'border-brand bg-orange-50'
+                  ? 'border-brand bg-brand/10'
                   : 'border-border bg-surface hover:border-gray-300'
               }`}
             >
@@ -322,13 +324,8 @@ export default function OnboardingFlow() {
 
   return (
     <div className="w-full max-w-lg bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
-      {/* Progress bar */}
-      <div className="h-1 bg-gray-100">
-        <div
-          className="h-full bg-brand transition-all duration-500 ease-out"
-          style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
-        />
-      </div>
+      {/* Progress — elevation profile fills in as you climb the steps */}
+      <ElevationProgress progress={(step / TOTAL_STEPS) * 100} height={16} />
 
       <div className="px-8 py-10">
         {/* Step counter */}
@@ -387,10 +384,12 @@ export default function OnboardingFlow() {
             Back
           </button>
 
-          <button
+          <motion.button
             type="button"
             onClick={handleNext}
             disabled={!canProceed || isPending}
+            whileHover={!canProceed || isPending ? undefined : { scale: 1.03 }}
+            whileTap={!canProceed || isPending ? undefined : { scale: 0.96 }}
             className="rounded-lg px-7 py-2.5 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
             {isPending
@@ -398,7 +397,7 @@ export default function OnboardingFlow() {
               : step === TOTAL_STEPS
               ? 'Finish'
               : 'Continue'}
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>

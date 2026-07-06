@@ -48,8 +48,8 @@ function TypeIcon({ type }: { type: string }) {
     </div>
   )
   if (type === 'trip_request') return (
-    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8520A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <div className="w-8 h-8 rounded-full bg-brand/15 flex items-center justify-center shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 4 17 4 16.8 5.4 15.5 5.5l-4 .5L5 2H3l2 6.5L2.5 12 3 13.5l4-.5 4.5 6.5z"/>
       </svg>
     </div>
@@ -235,8 +235,8 @@ export default function NotificationBell({ userId }: { userId: string }) {
       >
         <svg
           width="20" height="20" viewBox="0 0 24 24"
-          fill={unread > 0 ? '#E8520A' : 'none'}
-          stroke={unread > 0 ? '#E8520A' : 'currentColor'}
+          fill={unread > 0 ? 'var(--brand)' : 'none'}
+          stroke={unread > 0 ? 'var(--brand)' : 'currentColor'}
           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           aria-hidden="true"
         >
@@ -279,7 +279,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                   return (
                     <div
                       key={n.id}
-                      className={`flex items-start gap-3 px-4 py-3 ${!n.read ? 'bg-orange-50/50' : ''}`}
+                      className={`flex items-start gap-3 px-4 py-3 ${!n.read ? 'bg-brand/5' : ''}`}
                     >
                       <TypeIcon type={n.type} />
                       <div className="flex-1 min-w-0">
@@ -312,7 +312,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     href={notifLink(n)}
                     onClick={() => setOpen(false)}
                     className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition ${
-                      !n.read ? 'bg-orange-50/50' : ''
+                      !n.read ? 'bg-brand/5' : ''
                     }`}
                   >
                     <TypeIcon type={n.type} />

@@ -1,56 +1,93 @@
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+
 @import "tailwindcss";
 
 :root {
-  --background: #F5EDE0;
-  --foreground: #1C1410;
-  --brand: #E8520A;
-  --surface: #FFFCF7;
-  --border: #E5D5C0;
-  --muted: #7A6A58;
-  /* backward-compat aliases */
-  --sand: #F5EDE0;
-  --sand-dark: #EDE0CE;
+  /* Trailhead — fog paper, pine, trail-blaze rust, waypoint mustard */
+  --background: #F0EEE4;
+  --foreground: #23271F;
+  --brand:      #C1502E;
+  --brand-rgb:  193, 80, 46;
+  --pine:       #2B4739;
+  --surface:    #FBFAF6;
+  --border:     #D6CFB3;
+  --muted:      #6E6B54;
+  --accent:     #D9A441;
+  --sand:       #EAE3CC;
+  --sand-dark:  #DED5B0;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-brand: var(--brand);
-  --color-surface: var(--surface);
-  --color-border: var(--border);
-  --color-muted: var(--muted);
-  --color-sand: var(--sand);
-  --color-sand-dark: var(--sand-dark);
-  --font-sans: var(--font-dm-sans);
-  --font-serif: var(--font-playfair);
+  --color-foreground:  var(--foreground);
+  --color-brand:       var(--brand);
+  --color-pine:        var(--pine);
+  --color-surface:     var(--surface);
+  --color-border:      var(--border);
+  --color-muted:       var(--muted);
+  --color-accent:      var(--accent);
+  --color-sand:        var(--sand);
+  --color-sand-dark:   var(--sand-dark);
+  --font-sans:      'Satoshi', var(--font-dm-sans), Arial, sans-serif;
+  --font-serif:     'Anton', var(--font-playfair), Georgia, serif;
+  --font-editorial: 'Lora', var(--font-playfair), Georgia, serif;
+
+  /* Light, warm, sage-tinted neutral scale (not pure grey) */
+  --color-gray-50:  #F8F6EE;
+  --color-gray-100: #F1EDDD;
+  --color-gray-200: #E3DDC3;
+  --color-gray-300: #CCC3A0;
+  --color-gray-400: #9C9678;
+  --color-gray-500: #726C54;
+  --color-gray-600: #56543F;
+  --color-gray-700: #403F30;
+  --color-gray-800: #2E3126;
+  --color-gray-900: #1E211A;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-dm-sans, Arial, sans-serif);
+  font-family: 'Satoshi', var(--font-dm-sans), Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Card enter animation ────────────────────────────────────── */
+/* ── Editorial accent — Lora italic for captions/attribution ────── */
+.text-editorial {
+  font-family: var(--font-editorial);
+  font-style: italic;
+}
+
+/* ── Topographic contour texture ──────────────────────────────── */
+.bg-topo {
+  background-image:
+    radial-gradient(circle at 20% 30%, transparent 38px, rgba(43,71,57,.05) 39px, rgba(43,71,57,.05) 40px, transparent 41px),
+    radial-gradient(circle at 80% 70%, transparent 58px, rgba(193,80,46,.05) 59px, rgba(193,80,46,.05) 60px, transparent 61px),
+    radial-gradient(circle at 50% 100%, transparent 78px, rgba(43,71,57,.04) 79px, rgba(43,71,57,.04) 80px, transparent 81px);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+/* ── Card enter animation ──────────────────────────────────────── */
 @keyframes card-enter {
   from { opacity: 0; transform: translateY(8px) scale(0.99); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .card-enter { animation: card-enter 0.22s ease-out both; }
 
-/* ── Fade in ─────────────────────────────────────────────────── */
+/* ── Fade in ───────────────────────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 .fade-in { animation: fade-in 0.15s ease-out both; }
 
-/* ── Range sliders ───────────────────────────────────────────── */
+/* ── Range sliders ─────────────────────────────────────────────── */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  background: #E5E7EB;
+  background: var(--border);
   border-radius: 9999px;
   height: 4px;
   outline: none;
@@ -63,17 +100,23 @@ input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #E8520A;
+  background: var(--brand);
   cursor: pointer;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 8px rgba(var(--brand-rgb), 0.45);
 }
 input[type="range"]::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #E8520A;
+  background: var(--brand);
   cursor: pointer;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 8px rgba(var(--brand-rgb), 0.45);
 }
+
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gray-400, #9C9678); }

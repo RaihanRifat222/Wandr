@@ -305,7 +305,7 @@ export default async function ProfilePage({
             ) : isOwn ? (
               <Link
                 href="/profile/edit"
-                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-orange-50/30 transition group"
+                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-brand/5 transition group"
               >
                 <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand transition shrink-0">
                   <PlusIcon />
@@ -328,7 +328,7 @@ export default async function ProfilePage({
             ) : isOwn ? (
               <Link
                 href="/profile/edit"
-                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-orange-50/30 transition group"
+                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-brand/5 transition group"
               >
                 <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand transition shrink-0">
                   <PlusIcon />
@@ -415,7 +415,7 @@ export default async function ProfilePage({
             ) : isOwn ? (
               <Link
                 href="/profile/edit"
-                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-orange-50/30 transition group"
+                className="flex items-center gap-3 bg-surface rounded-xl border border-dashed border-gray-200 p-6 hover:border-brand/40 hover:bg-brand/5 transition group"
               >
                 <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand transition shrink-0">
                   <PlusIcon />
@@ -432,7 +432,7 @@ export default async function ProfilePage({
               {budget && (
                 <div>
                   <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Budget</h2>
-                  <span className="inline-flex items-center rounded-lg px-3.5 py-2 border-2 border-brand bg-orange-50 text-sm font-semibold text-brand">
+                  <span className="inline-flex items-center rounded-lg px-3.5 py-2 border-2 border-brand bg-brand/10 text-sm font-semibold text-brand">
                     {budget.label}
                   </span>
                 </div>
@@ -448,7 +448,7 @@ export default async function ProfilePage({
                       <Link
                         key={trip.id}
                         href={`/trips/${trip.id}`}
-                        className="flex items-center gap-3 rounded-lg border border-gray-100 px-4 py-3 hover:border-brand/30 hover:bg-orange-50/30 transition group"
+                        className="flex items-center gap-3 rounded-lg border border-gray-100 px-4 py-3 hover:border-brand/30 hover:bg-brand/5 transition group"
                       >
                         <div className="text-gray-300 group-hover:text-brand/50 transition shrink-0">
                           <CalendarIcon />

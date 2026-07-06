@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion } from 'motion/react'
 
 // ── Nav items ────────────────────────────────────────────────────────────────
 
@@ -16,7 +17,7 @@ const NAV = [
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
 function Icon({ name, active }: { name: string; active: boolean }) {
-  const color = active ? 'white' : '#9CA3AF'
+  const color = active ? 'white' : 'var(--muted)'
   const w = 19, h = 19
 
   if (name === 'home') return (
@@ -55,7 +56,7 @@ function Icon({ name, active }: { name: string; active: boolean }) {
 
 function MapPinIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="#E8520A" stroke="#E8520A" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--brand)" stroke="var(--brand)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
       <circle cx="12" cy="10" r="3" fill="white" stroke="none"/>
     </svg>
@@ -69,63 +70,53 @@ function LandscapeIllustration() {
     <svg viewBox="0 0 220 185" xmlns="http://www.w3.org/2000/svg" className="w-full block">
       <defs>
         <linearGradient id="ls-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FDE8C8" />
-          <stop offset="45%" stopColor="#FBBD85" />
-          <stop offset="100%" stopColor="#F5A455" />
-        </linearGradient>
-        <linearGradient id="ls-water" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#56C5BF" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#3AADAA" stopOpacity="0.7" />
+          <stop offset="0%" stopColor="#F7F4E8" />
+          <stop offset="100%" stopColor="#EAE3CC" />
         </linearGradient>
         <radialGradient id="ls-sun-glow" cx="50%" cy="50%">
-          <stop offset="0%" stopColor="#FFE080" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#FFE080" stopOpacity="0" />
+          <stop offset="0%" stopColor="#D9A441" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#D9A441" stopOpacity="0" />
         </radialGradient>
       </defs>
 
       {/* Sky */}
       <rect width="220" height="185" fill="url(#ls-sky)" />
 
-      {/* Sun glow */}
-      <circle cx="98" cy="68" r="46" fill="url(#ls-sun-glow)" />
       {/* Sun */}
-      <circle cx="98" cy="68" r="24" fill="#FFE07A" opacity="0.96" />
+      <circle cx="172" cy="36" r="30" fill="url(#ls-sun-glow)" />
+      <circle cx="172" cy="36" r="12" fill="#D9A441" />
 
-      {/* Far mountains — lightest */}
-      <path d="M0 112 L28 78 L58 98 L96 55 L136 82 L172 66 L220 78 L220 185 L0 185 Z"
-            fill="#EE965C" opacity="0.45" />
+      {/* Far ridge */}
+      <path d="M0 108 L30 82 L62 100 L98 66 L138 90 L176 74 L220 88 L220 185 L0 185 Z"
+            fill="#8A9A85" opacity="0.45" />
 
-      {/* Mid mountains */}
-      <path d="M0 128 L38 92 L72 114 L110 78 L150 102 L190 86 L220 96 L220 185 L0 185 Z"
-            fill="#C96A28" opacity="0.72" />
+      {/* Mid ridge */}
+      <path d="M0 126 L36 96 L74 116 L112 84 L152 108 L192 90 L220 100 L220 185 L0 185 Z"
+            fill="#5C7460" opacity="0.7" />
 
-      {/* Near hills */}
-      <path d="M0 150 L32 122 L80 144 L128 116 L182 138 L220 126 L220 185 L0 185 Z"
-            fill="#8B3A0E" opacity="0.88" />
+      {/* Near ridge (pine) with topographic contour lines */}
+      <path d="M0 148 L34 118 L82 140 L118 108 L168 134 L220 116 L220 185 L0 185 Z" fill="#2B4739" />
+      <path d="M28 148 Q60 132 96 142 Q132 152 168 138" stroke="#EAE3CC" strokeWidth="1" fill="none" opacity="0.25" />
+      <path d="M40 160 Q72 146 108 154 Q144 162 180 150" stroke="#EAE3CC" strokeWidth="1" fill="none" opacity="0.2" />
+      <path d="M55 172 Q85 160 118 166 Q152 172 184 163" stroke="#EAE3CC" strokeWidth="1" fill="none" opacity="0.15" />
 
-      {/* Water */}
-      <path d="M0 164 Q55 156 110 165 Q165 173 220 162 L220 185 L0 185 Z"
-            fill="url(#ls-water)" />
-      {/* Water shimmer */}
-      <path d="M18 173 Q60 167 105 173 Q148 179 188 171"
-            stroke="#88DFDA" strokeWidth="1.5" fill="none" opacity="0.55" />
+      {/* Trail — dashed rust path winding to the summit */}
+      <path
+        d="M18 185 Q30 160 26 142 Q22 122 42 112 Q64 100 60 118 Q56 134 82 138"
+        stroke="#C1502E" strokeWidth="2" strokeDasharray="1 5" strokeLinecap="round" fill="none" opacity="0.85"
+      />
+      {/* Summit marker */}
+      <circle cx="82" cy="138" r="4.5" fill="#C1502E" />
+      <circle cx="82" cy="138" r="4.5" fill="none" stroke="#F7F4E8" strokeWidth="1.5" />
 
-      {/* Palm trunk */}
-      <path d="M183 185 Q181 170 176 153 Q173 141 170 132"
-            stroke="#2E1404" strokeWidth="5" fill="none" strokeLinecap="round" />
-
-      {/* Palm fronds */}
-      <path d="M170 132 Q153 119 140 127 Q156 113 170 132" fill="#2A5E14" opacity="0.92" />
-      <path d="M170 132 Q188 116 198 128 Q186 113 170 132" fill="#2A5E14" opacity="0.92" />
-      <path d="M170 132 Q164 113 178 110 Q172 120 170 132" fill="#2E6A18" opacity="0.9" />
-      <path d="M170 132 Q155 127 150 138 Q159 122 170 132" fill="#2A5E14" opacity="0.8" />
-      <path d="M170 132 Q186 128 194 140 Q183 124 170 132" fill="#2A5E14" opacity="0.8" />
-
-      {/* Clouds */}
-      <ellipse cx="40" cy="40" rx="22" ry="9" fill="white" opacity="0.22" />
-      <ellipse cx="55" cy="35" rx="16" ry="7" fill="white" opacity="0.18" />
-      <ellipse cx="155" cy="30" rx="18" ry="7" fill="white" opacity="0.18" />
-      <ellipse cx="168" cy="26" rx="12" ry="6" fill="white" opacity="0.15" />
+      {/* Pine trees */}
+      {[[24, 176, 10], [196, 172, 13], [206, 180, 9]].map(([x, y, s], i) => (
+        <g key={i} transform={`translate(${x} ${y})`} opacity="0.9">
+          <path d={`M0 0 L${-s * 0.6} ${s} L${s * 0.6} ${s} Z`} fill="#233B2F" />
+          <path d={`M0 ${-s * 0.5} L${-s * 0.45} ${s * 0.55} L${s * 0.45} ${s * 0.55} Z`} fill="#2B4739" />
+          <rect x={-1} y={s} width="2" height={s * 0.35} fill="#4A4536" />
+        </g>
+      ))}
     </svg>
   )
 }
@@ -146,7 +137,7 @@ export default function LeftSidebar({ profileHref }: { profileHref: string }) {
   }
 
   return (
-    <aside className="hidden md:flex w-[220px] shrink-0 sticky top-0 h-screen flex-col bg-[#FDF8F2] border-r border-[#EDE0CA] overflow-hidden">
+    <aside className="hidden md:flex w-[220px] shrink-0 sticky top-0 h-screen flex-col bg-surface border-r border-border overflow-hidden">
 
       {/* Logo */}
       <div className="px-5 pt-6 pb-4">
@@ -165,14 +156,21 @@ export default function LeftSidebar({ profileHref }: { profileHref: string }) {
               key={item.icon}
               href={item.href}
               className={[
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
-                active
-                  ? 'bg-brand text-white shadow-sm'
-                  : 'text-gray-500 hover:bg-[#F0E8DA] hover:text-gray-800',
+                'relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
+                active ? 'text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
               ].join(' ')}
             >
-              <Icon name={item.icon} active={active} />
-              {item.label}
+              {active && (
+                <motion.span
+                  layoutId="sidebarActivePill"
+                  className="absolute inset-0 rounded-xl bg-brand shadow-sm"
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-3">
+                <Icon name={item.icon} active={active} />
+                {item.label}
+              </span>
             </Link>
           )
         })}

@@ -4,9 +4,14 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
+type Member = { id: string; username: string | null; full_name: string | null; avatar_url: string | null }
+
 type Conv = {
   id: string
-  other: { id: string; username: string | null; full_name: string | null; avatar_url: string | null } | null
+  isGroup: boolean
+  title: string | null
+  other: Member | null
+  members: Member[]
   lastMsg: { content: string; created_at: string; sender_id: string; read_at: string | null } | null
   unread: number
 }
@@ -33,30 +38,61 @@ export default function MessagesButton({ userId }: { userId: string }) {
   const totalUnread = convs.reduce((n, c) => n + c.unread, 0)
 
   async function load() {
-    const { data } = await supabase
-      .from('conversations')
-      .select(`
-        id, participant_a, participant_b,
-        pa:profiles!participant_a(id, username, full_name, avatar_url),
-        pb:profiles!participant_b(id, username, full_name, avatar_url),
-        messages(id, content, created_at, sender_id, read_at)
-      `)
-      .or(`participant_a.eq.${userId},participant_b.eq.${userId}`)
+    const [{ data: oneToOne }, { data: myGroupLinks }] = await Promise.all([
+      supabase
+        .from('conversations')
+        .select(`
+          id, participant_a, participant_b,
+          pa:profiles!participant_a(id, username, full_name, avatar_url),
+          pb:profiles!participant_b(id, username, full_name, avatar_url),
+          messages(id, content, created_at, sender_id, read_at)
+        `)
+        .eq('is_group', false)
+        .or(`participant_a.eq.${userId},participant_b.eq.${userId}`),
+      supabase.from('conversation_participants').select('conversation_id').eq('user_id', userId),
+    ])
 
-    if (!data) return
+    const groupIds = (myGroupLinks ?? []).map(l => l.conversation_id)
+    const { data: groupData } = groupIds.length > 0
+      ? await supabase
+          .from('conversations')
+          .select(`
+            id, title,
+            conversation_participants(user_id, profile:profiles(id, username, full_name, avatar_url)),
+            messages(id, content, created_at, sender_id, read_at)
+          `)
+          .in('id', groupIds)
+      : { data: [] as any[] }
 
-    const processed: Conv[] = data.map((c: any) => {
-      const other = c.participant_a === userId ? c.pb : c.pa
-      const msgs  = [...(c.messages ?? [])].sort(
-        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    function sortMsgs(msgs: any[]) {
+      return [...(msgs ?? [])].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )
+    }
+
+    const oneToOneProcessed: Conv[] = (oneToOne ?? []).map((c: any) => {
+      const other = c.participant_a === userId ? c.pb : c.pa
+      const msgs  = sortMsgs(c.messages)
       return {
-        id:      c.id,
-        other,
+        id: c.id, isGroup: false, title: null, other, members: [],
         lastMsg: msgs[0] ?? null,
         unread:  msgs.filter((m: any) => m.sender_id !== userId && !m.read_at).length,
       }
     })
+
+    const groupProcessed: Conv[] = (groupData ?? []).map((c: any) => {
+      const members = (c.conversation_participants ?? [])
+        .map((p: any) => p.profile)
+        .filter((p: any) => p && p.id !== userId)
+      const msgs = sortMsgs(c.messages)
+      return {
+        id: c.id, isGroup: true, title: c.title, other: null, members,
+        lastMsg: msgs[0] ?? null,
+        unread:  msgs.filter((m: any) => m.sender_id !== userId && !m.read_at).length,
+      }
+    })
+
+    const processed = [...oneToOneProcessed, ...groupProcessed]
 
     processed.sort((a, b) => {
       if (!a.lastMsg) return 1
@@ -107,8 +143,8 @@ export default function MessagesButton({ userId }: { userId: string }) {
       >
         <svg
           width="20" height="20" viewBox="0 0 24 24"
-          fill={totalUnread > 0 ? '#E8520A' : 'none'}
-          stroke={totalUnread > 0 ? '#E8520A' : 'currentColor'}
+          fill={totalUnread > 0 ? '#FF5C3A' : 'none'}
+          stroke={totalUnread > 0 ? '#FF5C3A' : 'currentColor'}
           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           aria-hidden="true"
         >
@@ -136,22 +172,23 @@ export default function MessagesButton({ userId }: { userId: string }) {
           ) : (
             <div className="divide-y divide-gray-50">
               {convs.map(c => {
-                const name    = c.other?.full_name ?? c.other?.username ?? 'Unknown'
+                const name    = c.isGroup ? (c.title ?? 'Trip group chat') : (c.other?.full_name ?? c.other?.username ?? 'Unknown')
                 const inits   = getInitials(c.other?.full_name ?? null, c.other?.username ?? null)
                 const isUnread = c.unread > 0
+                const avatarUrl = c.isGroup ? c.members[0]?.avatar_url : c.other?.avatar_url
 
                 return (
                   <Link
                     key={c.id}
                     href={`/messages/${c.id}`}
                     onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition ${isUnread ? 'bg-orange-50/40' : ''}`}
+                    className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition ${isUnread ? 'bg-brand/5' : ''}`}
                   >
-                    {c.other?.avatar_url ? (
-                      <img src={c.other.avatar_url} alt={name} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt={name} className="w-9 h-9 rounded-full object-cover shrink-0" />
                     ) : (
                       <div className="w-9 h-9 rounded-full bg-brand/10 text-brand font-serif font-bold flex items-center justify-center text-xs shrink-0">
-                        {inits}
+                        {c.isGroup ? name[0]?.toUpperCase() : inits}
                       </div>
                     )}
 

@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import { requestToJoin } from '@/lib/actions/trips'
+import TiltCard from '@/components/TiltCard'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,14 +40,14 @@ type Props = {
 const REGIONS = ['Europe', 'Asia', 'Americas', 'Africa', 'Oceania', 'Middle East']
 
 const REGION_STYLES: Record<string, { from: string; to: string }> = {
-  Europe:        { from: '#667eea', to: '#764ba2' },
-  Asia:          { from: '#f093fb', to: '#f5576c' },
-  Americas:      { from: '#43e97b', to: '#38f9d7' },
-  Africa:        { from: '#f7971e', to: '#ffd200' },
-  Oceania:       { from: '#4facfe', to: '#00f2fe' },
-  'Middle East': { from: '#f6d365', to: '#fda085' },
+  Europe:        { from: '#5B7B8C', to: '#3E5C68' },
+  Asia:          { from: '#C1502E', to: '#8C3A20' },
+  Americas:      { from: '#5C7E5E', to: '#33503A' },
+  Africa:        { from: '#D9A441', to: '#B5762A' },
+  Oceania:       { from: '#3E8E86', to: '#2A5F5A' },
+  'Middle East': { from: '#C98A4B', to: '#9C5F30' },
 }
-const FALLBACK_STYLE = { from: '#E8520A', to: '#f97316' }
+const FALLBACK_STYLE = { from: '#C1502E', to: '#8C3A20' }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -409,7 +410,9 @@ export default function TripCards({ trips, requestedIds, userId }: Props) {
                 exit="exit"
                 transition={{ duration: 0.25, ease: 'easeOut' }}
               >
-                <TripCard trip={trip} />
+                <TiltCard max={6}>
+                  <TripCard trip={trip} />
+                </TiltCard>
               </motion.div>
             </AnimatePresence>
           </div>

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { motion } from 'motion/react'
 import { acceptBuddyRequest, declineBuddyRequest, sendBuddyRequest } from '@/lib/actions/profile'
 
 type Status = 'none' | 'pending_sent' | 'pending_received' | 'connected'
@@ -58,8 +59,10 @@ export default function MatchActions({
         {/* ── They sent me a request ─────────────────────────── */}
         {status === 'pending_received' && matchId && (
           <>
-            <button
+            <motion.button
               disabled={isPending}
+              whileHover={isPending ? undefined : { scale: 1.03 }}
+              whileTap={isPending ? undefined : { scale: 0.96 }}
               onClick={() => start(async () => {
                 const r = await acceptBuddyRequest(matchId)
                 if (r?.error) { setError(r.error); return }
@@ -69,7 +72,7 @@ export default function MatchActions({
               className="rounded-lg px-4 py-2 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-50 transition"
             >
               {isPending ? 'Accepting…' : 'Accept'}
-            </button>
+            </motion.button>
             <button
               disabled={isPending}
               onClick={() => start(async () => {
@@ -112,8 +115,10 @@ export default function MatchActions({
         {/* ── Not connected yet ──────────────────────────────── */}
         {status === 'none' && (
           <>
-            <button
+            <motion.button
               disabled={isPending}
+              whileHover={isPending ? undefined : { scale: 1.03 }}
+              whileTap={isPending ? undefined : { scale: 0.96 }}
               onClick={() => start(async () => {
                 const r = await sendBuddyRequest(targetUserId)
                 if (r?.error) { setError(r.error); return }
@@ -122,7 +127,7 @@ export default function MatchActions({
               className="rounded-lg px-4 py-2 bg-brand text-white text-sm font-semibold hover:brightness-95 disabled:opacity-50 transition"
             >
               {isPending ? 'Sending…' : 'Connect'}
-            </button>
+            </motion.button>
             {username && (
               <Link
                 href={`/profile/${username}`}

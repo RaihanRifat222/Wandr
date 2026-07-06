@@ -31,7 +31,7 @@ export default function DashboardSidebar({ suggestedTrips, showProfileNudge }: P
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="relative overflow-hidden rounded-xl bg-gradient-to-br from-brand to-orange-500 p-5 text-white"
+          className="relative overflow-hidden rounded-xl bg-gradient-to-br from-brand to-pine p-5 text-white"
         >
           <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/10" />
           <p className="relative font-serif font-bold text-base">Finish your profile</p>

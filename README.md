@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wandr — Find Your Travel Buddy
+
+A social platform for backpackers and travellers to find compatible travel buddies, post trips, get AI-matched with compatible people, and plan trips together.
+
+## Features
+
+### Auth & Profiles
+- Email/password and Google OAuth sign-in
+- 5-step onboarding (home city, bio, interests, travel style sliders, budget range)
+- Public profile pages with favourite travel moment, posts grid, and stats
+- Profile editing
+
+### Social feed
+- Post travel photos/videos with captions, tagged to a trip
+- Likes and comments
+- Feed ranked per-user by profile-embedding similarity (OpenAI `text-embedding-3-small` + cosine similarity), interest overlap, travel-style proximity, and recency
+
+### Trips
+- Post a trip: destination, region, dates, budget tier, group size, description
+- Browse trips as a swipeable card deck, filterable by region
+- Semantic trip search ("laid-back hiking buddy for a slow Southeast Asia trip") via vector embeddings
+- Trip detail page with a host approve/decline panel for join requests
+
+### Matching
+- AI-scored compatibility between travellers (destination overlap, dates, budget, travel style, shared interests)
+- Discover/connect flow with buddy requests
+
+### Messaging
+- Real-time 1:1 chat (Supabase Realtime)
+- **Group chats per trip** — accepting a join request adds that person to one shared group conversation with the host and everyone else already accepted, instead of a separate 1:1 thread
+- Click a group chat's name to see the full member list and jump to anyone's profile
+- Markdown rendering in messages (bold, lists, links, tables, code)
+
+### Wandr AI — trip-planning assistant
+- Mention `@wandr` in any group chat to get trip-aware suggestions, itineraries, and logistics help
+- Has full context of the trip (destination, dates, budget, notes) and the conversation history
+- Posts as a real "Wandr AI" member of the chat, with its own avatar
+- Powered by OpenAI (`gpt-4o-mini`)
+
+### Notifications
+- In-app notifications for buddy requests, trip requests/acceptances, messages, likes, and comments
+- Unread badges on the navbar messages and notifications icons
+
+### Design
+- "Trailhead" visual identity — warm, light, topographic-map inspired (see `CLAUDE.md` for the full palette/design system)
+- 3D cursor-tilt trip and match cards, elevation-profile progress bars, spring-animated interactions throughout
+
+## Stack
+
+- **Next.js 16** (App Router, TypeScript)
+- **Supabase** — Postgres, Auth, Realtime, Storage, Row Level Security
+- **Tailwind CSS**
+- **OpenAI** — embeddings for match/search ranking, `gpt-4o-mini` for the group-chat trip assistant
+- **Framer Motion** for animation
+
+See `CLAUDE.md` for the detailed design system, database schema notes, and progress checklist.
 
 ## Getting Started
 
-First, run the development server:
+1. Copy `.env.local.example` (or create `.env.local`) with:
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+   - `OPENAI_API_KEY`
+2. Run the SQL files in `supabase/` (in order: `schema.sql`, `trip_search_embeddings.sql`, `group_chats.sql`) via the Supabase SQL Editor.
+3. Install dependencies and start the dev server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Demo data can be seeded via the scripts in `scripts/` (see `CLAUDE.md` for seed account credentials).
